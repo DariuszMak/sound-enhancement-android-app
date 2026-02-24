@@ -10,6 +10,7 @@ import android.media.audiofx.LoudnessEnhancer
 import android.os.Build
 import android.os.IBinder
 import androidx.core.app.NotificationCompat
+import android.content.pm.ServiceInfo
 
 class AudioBoostService : Service() {
 
@@ -63,12 +64,16 @@ class AudioBoostService : Service() {
             manager.createNotificationChannel(channel)
         }
 
-        val notification: Notification = NotificationCompat.Builder(this, channelId)
+        val notification = NotificationCompat.Builder(this, channelId)
             .setContentTitle("Sound Enhancement Active")
             .setContentText("Bass & Volume Booster Running")
             .setSmallIcon(R.mipmap.ic_launcher)
             .build()
 
-        startForeground(1, notification)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            startForeground(1, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK)
+        } else {
+            startForeground(1, notification)
+        }
     }
 }

@@ -14,7 +14,8 @@
         android:theme="@style/Theme.SoundEnchancement">
         <service
             android:name=".AudioBoostService"
-            android:exported="false"/>
+            android:exported="false"
+            android:foregroundServiceType="mediaPlayback" />
         <activity
             android:name=".MainActivity"
             android:exported="true">
