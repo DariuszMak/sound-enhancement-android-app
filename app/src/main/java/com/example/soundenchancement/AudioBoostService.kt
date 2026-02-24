@@ -13,8 +13,16 @@ import androidx.core.app.NotificationCompat
 
 class AudioBoostService : Service() {
 
+    private val binder = LocalBinder()
+
     private var bassBoost: BassBoost? = null
     private var loudnessEnhancer: LoudnessEnhancer? = null
+
+    inner class LocalBinder : android.os.Binder() {
+        fun getService(): AudioBoostService = this@AudioBoostService
+    }
+
+    override fun onBind(intent: Intent?): IBinder = binder
 
     override fun onCreate() {
         super.onCreate()
@@ -41,8 +49,6 @@ class AudioBoostService : Service() {
         loudnessEnhancer?.release()
         super.onDestroy()
     }
-
-    override fun onBind(intent: Intent?): IBinder? = null
 
     private fun startForegroundService() {
         val channelId = "boost_channel"
