@@ -5,14 +5,19 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.Service
 import android.content.Intent
+import android.content.pm.ServiceInfo
 import android.media.audiofx.BassBoost
 import android.media.audiofx.LoudnessEnhancer
 import android.os.Build
 import android.os.IBinder
+import android.util.Log
 import androidx.core.app.NotificationCompat
-import android.content.pm.ServiceInfo
 
 class AudioBoostService : Service() {
+
+    companion object {
+        var effectFactory: AudioEffectFactory = AudioEffectFactory()
+    }
 
     private val binder = LocalBinder()
 
@@ -27,21 +32,31 @@ class AudioBoostService : Service() {
 
     override fun onCreate() {
         super.onCreate()
-        startForegroundService()
         enableEffects()
+        startForegroundService()
+        Log.d("AudioBoostService", "Service created")
     }
 
     private fun enableEffects() {
         try {
-            loudnessEnhancer = LoudnessEnhancer(0)
-            loudnessEnhancer?.setTargetGain(1000)
-            loudnessEnhancer?.enabled = true
+            val sessionId = 0
 
-            bassBoost = BassBoost(0, 0)
-            bassBoost?.setStrength(1000)
-            bassBoost?.enabled = true
+            loudnessEnhancer = effectFactory
+                .createLoudnessEnhancer(sessionId)
+                .apply {
+                    setTargetGain(1000)
+                    enabled = true
+                }
+
+            bassBoost = effectFactory
+                .createBassBoost(sessionId)
+                .apply {
+                    setStrength(1000)
+                    enabled = true
+                }
+
         } catch (e: Exception) {
-            e.printStackTrace()
+            Log.e("AudioBoostService", "Effect initialization failed", e)
         }
     }
 
@@ -64,16 +79,24 @@ class AudioBoostService : Service() {
             manager.createNotificationChannel(channel)
         }
 
-        val notification = NotificationCompat.Builder(this, channelId)
+        val notification: Notification = NotificationCompat.Builder(this, channelId)
             .setContentTitle("Sound Enhancement Active")
             .setContentText("Bass & Volume Booster Running")
             .setSmallIcon(R.mipmap.ic_launcher)
             .build()
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            startForeground(1, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK)
+            startForeground(
+                1,
+                notification,
+                ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK
+            )
         } else {
             startForeground(1, notification)
         }
     }
+
+    // For test access (cleaner than reflection)
+    fun getBassBoost(): BassBoost? = bassBoost
+    fun getLoudnessEnhancer(): LoudnessEnhancer? = loudnessEnhancer
 }
