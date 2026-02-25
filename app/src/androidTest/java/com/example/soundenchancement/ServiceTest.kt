@@ -17,14 +17,16 @@ class AudioBoostServiceTest {
 
     @Before
     fun setup() {
-        // Inject the fake factory before starting the service
-        AudioBoostService.effectFactory = FakeAudioEffectFactory()
+        // Inject fake factories
+        AudioBoostService.bassBoostFactory = { FakeBassBoost() }
+        AudioBoostService.loudnessFactory = { FakeLoudnessEnhancer() }
     }
 
     @After
     fun tearDown() {
-        // Restore default factory after test
-        AudioBoostService.effectFactory = AudioEffectFactory()
+        // Restore real factories after tests
+        AudioBoostService.bassBoostFactory = { RealBassBoost() }
+        AudioBoostService.loudnessFactory = { RealLoudnessEnhancer(it) }
     }
 
     @Test
@@ -36,16 +38,13 @@ class AudioBoostServiceTest {
         val binder = serviceRule.bindService(intent)
         val service = (binder as AudioBoostService.LocalBinder).getService()
 
-        // Service itself is created
         assertNotNull(service)
 
-        // BassBoost
         val bassBoost = service.getBassBoost()
         assertNotNull(bassBoost)
-        assertTrue(bassBoost?.roundedStrength?.toInt() ?: 0 > 0)
+        assertTrue(bassBoost?.roundedStrength ?: 0 > 0)
         assertTrue(bassBoost?.enabled ?: false)
 
-        // LoudnessEnhancer
         val loudness = service.getLoudnessEnhancer()
         assertNotNull(loudness)
         assertEquals(1000, loudness?.targetGain)

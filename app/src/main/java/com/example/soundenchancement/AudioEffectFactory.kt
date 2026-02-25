@@ -1,15 +1,11 @@
 package com.example.soundenchancement
 
-import android.media.audiofx.BassBoost
-import android.media.audiofx.LoudnessEnhancer
+class FakeBassBoost : IBassBoost {
+    override val roundedStrength: Int = 1000
+    override var enabled: Boolean = true
+}
 
-open class AudioEffectFactory {
-
-    open fun createLoudnessEnhancer(sessionId: Int): LoudnessEnhancer {
-        return LoudnessEnhancer(sessionId)
-    }
-
-    open fun createBassBoost(sessionId: Int): BassBoost {
-        return BassBoost(0, sessionId)
-    }
+class FakeLoudnessEnhancer : ILoudnessEnhancer {
+    override var targetGain: Int = 1000
+    override var enabled: Boolean = true
 }

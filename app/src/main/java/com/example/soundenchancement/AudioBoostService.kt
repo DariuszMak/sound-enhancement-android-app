@@ -6,8 +6,6 @@ import android.app.NotificationManager
 import android.app.Service
 import android.content.Intent
 import android.content.pm.ServiceInfo
-import android.media.audiofx.BassBoost
-import android.media.audiofx.LoudnessEnhancer
 import android.os.Build
 import android.os.IBinder
 import android.util.Log
@@ -16,13 +14,14 @@ import androidx.core.app.NotificationCompat
 class AudioBoostService : Service() {
 
     companion object {
-        var effectFactory: AudioEffectFactory = AudioEffectFactory()
+        var bassBoostFactory: () -> IBassBoost = { RealBassBoost() }
+        var loudnessFactory: (Int) -> ILoudnessEnhancer = { RealLoudnessEnhancer(it) }
     }
 
     private val binder = LocalBinder()
 
-    private var bassBoost: BassBoost? = null
-    private var loudnessEnhancer: LoudnessEnhancer? = null
+    private var bassBoost: IBassBoost? = null
+    private var loudnessEnhancer: ILoudnessEnhancer? = null
 
     inner class LocalBinder : android.os.Binder() {
         fun getService(): AudioBoostService = this@AudioBoostService
@@ -38,33 +37,21 @@ class AudioBoostService : Service() {
     }
 
     private fun enableEffects() {
-        try {
-            val sessionId = 0
+        bassBoost = bassBoostFactory()
+        loudnessEnhancer = loudnessFactory(0)
 
-            loudnessEnhancer = effectFactory
-                .createLoudnessEnhancer(sessionId)
-                .apply {
-                    setTargetGain(1000)
-                    enabled = true
-                }
-
-            bassBoost = effectFactory
-                .createBassBoost(sessionId)
-                .apply {
-                    setStrength(1000)
-                    enabled = true
-                }
-
-        } catch (e: Exception) {
-            Log.e("AudioBoostService", "Effect initialization failed", e)
-        }
+        bassBoost?.enabled = true
+        loudnessEnhancer?.enabled = true
     }
 
     override fun onDestroy() {
-        bassBoost?.release()
-        loudnessEnhancer?.release()
+        bassBoost = null
+        loudnessEnhancer = null
         super.onDestroy()
     }
+
+    fun getBassBoost(): IBassBoost? = bassBoost
+    fun getLoudnessEnhancer(): ILoudnessEnhancer? = loudnessEnhancer
 
     private fun startForegroundService() {
         val channelId = "boost_channel"
@@ -95,8 +82,4 @@ class AudioBoostService : Service() {
             startForeground(1, notification)
         }
     }
-
-    // For test access (cleaner than reflection)
-    fun getBassBoost(): BassBoost? = bassBoost
-    fun getLoudnessEnhancer(): LoudnessEnhancer? = loudnessEnhancer
 }
