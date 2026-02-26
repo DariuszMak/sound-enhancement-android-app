@@ -16,15 +16,13 @@ class AudioBoostServiceTest {
 
     @Before
     fun setup() {
-        // Inject fake factories
         AudioBoostService.bassBoostFactory = { FakeBassBoost() }
         AudioBoostService.loudnessFactory = { FakeLoudnessEnhancer() }
     }
 
     @After
     fun tearDown() {
-        // Restore real factories after tests
-        AudioBoostService.bassBoostFactory = { RealBassBoost() }
+        AudioBoostService.bassBoostFactory = { RealBassBoost(it) }
         AudioBoostService.loudnessFactory = { RealLoudnessEnhancer(it) }
     }
 
