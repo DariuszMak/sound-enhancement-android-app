@@ -1,4 +1,5 @@
 package com.example.soundenchancement
+
 import android.content.Context
 import android.content.Intent
 import androidx.test.core.app.ApplicationProvider
@@ -16,18 +17,18 @@ class AudioBoostServiceTest {
 
     @Before
     fun setup() {
+        // Inject fake bass boost
         AudioBoostService.bassBoostFactory = { FakeBassBoost() }
-        AudioBoostService.loudnessFactory = { FakeLoudnessEnhancer() }
     }
 
     @After
     fun tearDown() {
-        AudioBoostService.bassBoostFactory = { RealBassBoost(it) }
-        AudioBoostService.loudnessFactory = { RealLoudnessEnhancer(it) }
+        // Restore real implementation
+        AudioBoostService.bassBoostFactory = { RealBassBoost() }
     }
 
     @Test
-    fun serviceStartsAndInitializesEffects() {
+    fun serviceStartsAndEnablesBassBoost() {
 
         val context = ApplicationProvider.getApplicationContext<Context>()
         val intent = Intent(context, AudioBoostService::class.java)
@@ -37,14 +38,14 @@ class AudioBoostServiceTest {
 
         assertNotNull(service)
 
-        val bassBoost = service.getBassBoost()
-        assertNotNull(bassBoost)
-        assertTrue(bassBoost?.roundedStrength ?: 0 > 0)
-        assertTrue(bassBoost?.enabled ?: false)
+        val bassBoostField =
+            AudioBoostService::class.java.getDeclaredField("bassBoost")
+        bassBoostField.isAccessible = true
 
-        val loudness = service.getLoudnessEnhancer()
-        assertNotNull(loudness)
-        assertEquals(1000, loudness?.targetGain)
-        assertTrue(loudness?.enabled ?: false)
+        val bassBoost = bassBoostField.get(service) as IBassBoost?
+
+        assertNotNull(bassBoost)
+        assertEquals(1000, bassBoost?.strength)
+        assertTrue(bassBoost?.enabled ?: false)
     }
 }
