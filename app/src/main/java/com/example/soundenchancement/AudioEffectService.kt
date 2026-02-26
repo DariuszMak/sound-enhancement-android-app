@@ -8,7 +8,7 @@ import android.os.IBinder
 import android.util.Log
 import androidx.core.app.NotificationCompat
 
-class AudioBoostService : Service() {
+class AudioEffectService : Service() {
 
     companion object {
         var bassBoostFactory: () -> IBassBoost = { RealBassBoost() }
@@ -18,7 +18,7 @@ class AudioBoostService : Service() {
     private var bassBoost: IBassBoost? = null
 
     inner class LocalBinder : android.os.Binder() {
-        fun getService(): AudioBoostService = this@AudioBoostService
+        fun getService(): AudioEffectService = this@AudioEffectService
     }
 
     override fun onBind(intent: Intent?): IBinder = binder

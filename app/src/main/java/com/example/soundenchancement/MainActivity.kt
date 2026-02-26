@@ -15,11 +15,11 @@ class MainActivity : AppCompatActivity() {
         val stopButton = findViewById<Button>(R.id.btnStop)
 
         startButton.setOnClickListener {
-            startService(Intent(this, AudioBoostService::class.java))
+            startService(Intent(this, AudioEffectService::class.java))
         }
 
         stopButton.setOnClickListener {
-            stopService(Intent(this, AudioBoostService::class.java))
+            stopService(Intent(this, AudioEffectService::class.java))
         }
     }
 }

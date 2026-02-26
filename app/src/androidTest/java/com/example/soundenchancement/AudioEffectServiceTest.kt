@@ -10,34 +10,34 @@ import org.junit.Assert.*
 import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
-class AudioBoostServiceTest {
+class AudioEffectServiceTest {
 
     @get:Rule
     val serviceRule = ServiceTestRule()
 
     @Before
     fun setup() {
-        AudioBoostService.bassBoostFactory = { FakeBassBoost() }
+        AudioEffectService.bassBoostFactory = { FakeBassBoost() }
     }
 
     @After
     fun tearDown() {
-        AudioBoostService.bassBoostFactory = { RealBassBoost() }
+        AudioEffectService.bassBoostFactory = { RealBassBoost() }
     }
 
     @Test
     fun serviceStartsAndEnablesBassBoost() {
 
         val context = ApplicationProvider.getApplicationContext<Context>()
-        val intent = Intent(context, AudioBoostService::class.java)
+        val intent = Intent(context, AudioEffectService::class.java)
 
         val binder = serviceRule.bindService(intent)
-        val service = (binder as AudioBoostService.LocalBinder).getService()
+        val service = (binder as AudioEffectService.LocalBinder).getService()
 
         assertNotNull(service)
 
         val bassBoostField =
-            AudioBoostService::class.java.getDeclaredField("bassBoost")
+            AudioEffectService::class.java.getDeclaredField("bassBoost")
         bassBoostField.isAccessible = true
 
         val bassBoost = bassBoostField.get(service) as IBassBoost?
