@@ -4,7 +4,7 @@ import android.media.audiofx.BassBoost
 
 class RealBassBoost : IBassBoost {
 
-    private val bass = BassBoost(0, 0) // 0 = global output mix
+    private val bass = BassBoost(0, 0)
 
     override var strength: Short
         get() = bass.roundedStrength

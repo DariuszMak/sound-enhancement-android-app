@@ -17,13 +17,11 @@ class AudioBoostServiceTest {
 
     @Before
     fun setup() {
-        // Inject fake bass boost
         AudioBoostService.bassBoostFactory = { FakeBassBoost() }
     }
 
     @After
     fun tearDown() {
-        // Restore real implementation
         AudioBoostService.bassBoostFactory = { RealBassBoost() }
     }
 

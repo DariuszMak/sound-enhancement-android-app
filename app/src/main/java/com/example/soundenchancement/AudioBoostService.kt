@@ -33,7 +33,7 @@ class AudioBoostService : Service() {
     private fun enableBassBoost() {
         try {
             bassBoost = bassBoostFactory()
-            bassBoost?.strength = 1000  // max strength
+            bassBoost?.strength = 1000
             bassBoost?.enabled = true
         } catch (e: Exception) {
             Log.e("AudioBoostService", "BassBoost not supported", e)
