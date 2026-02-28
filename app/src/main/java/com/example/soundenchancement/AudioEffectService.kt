@@ -42,28 +42,27 @@ class AudioEffectService : Service() {
                 for (i in 0 until numberOfBands) {
                     val freq = eq.getCenterFreq(i.toShort()) / 1000.0 // Hz
 
-                    // Dynamic-like bass curve (non-linear, professional style)
                     val boost = when {
-                        freq <= 60 -> baseLevel.toDouble()                     // ultra-low bass
+                        freq <= 60 -> baseLevel.toDouble()                  // deep bass
                         freq <= 120 -> baseLevel * 0.75
                         freq <= 250 -> baseLevel * 0.5
-                        freq <= 500 -> baseLevel * 0.25                         // low-mids
-                        freq <= 2000 -> baseLevel * 0.1                         // mids (clarity)
-                        freq <= 4000 -> baseLevel * 0.05                        // presence
-                        else -> 0.0
+                        freq <= 500 -> baseLevel * 0.25                     // low-mids
+                        freq <= 2000 -> baseLevel * 0.1                     // mids (vocals)
+                        freq <= 4000 -> baseLevel * 0.15                    // presence
+                        freq <= 8000 -> baseLevel * 0.25                    // upper mids / percussion
+                        else -> baseLevel * 0.2                              // highs for clarity/air
                     }
 
-                    // Apply exponential/log scaling for smoother, natural effect
+                    // Exponential scaling for smooth, musical sound
                     val scaledBoost = ((boost / 1000.0).pow(1.2) * (maxLevel - minLevel)).roundToInt() + minLevel
-
                     val bandLevelShort = scaledBoost.coerceIn(minLevel.toInt(), maxLevel.toInt()).toShort()
                     eq.setBandLevel(i.toShort(), bandLevelShort)
                 }
             }
 
-            Log.d("AudioBoostService", "Professional dynamic bass applied")
+            Log.d("AudioBoostService", "Professional dynamic bass + enhanced clarity applied")
         } catch (e: Exception) {
-            Log.e("AudioBoostService", "Error applying professional dynamic bass", e)
+            Log.e("AudioBoostService", "Error applying professional dynamic bass + clarity", e)
         }
     }
 
