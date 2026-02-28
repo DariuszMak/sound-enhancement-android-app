@@ -47,10 +47,10 @@ class AudioEffectService : Service() {
                         freq <= 120 -> baseLevel * 0.75
                         freq <= 250 -> baseLevel * 0.5
                         freq <= 500 -> baseLevel * 0.25                     // low-mids
-                        freq <= 2000 -> baseLevel * 0.1                     // mids (vocals)
-                        freq <= 4000 -> baseLevel * 0.15                    // presence
-                        freq <= 8000 -> baseLevel * 0.25                    // upper mids / percussion
-                        else -> baseLevel * 0.2                              // highs for clarity/air
+                        freq <= 2000 -> baseLevel * 0.25                     // mids (vocals)
+                        freq <= 4000 -> baseLevel * 0.45                    // presence
+                        freq <= 8000 -> baseLevel * 0.9                    // upper mids / percussion
+                        else -> baseLevel * 1.0                              // highs for clarity/air
                     }
 
                     // Exponential scaling for smooth, musical sound
