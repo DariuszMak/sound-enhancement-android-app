@@ -37,7 +37,6 @@ class AudioEffectServiceTest {
         val numberOfBands = eq!!.numberOfBands
         val (minLevel, maxLevel) = eq.bandLevelRange
 
-        // Check that all bands are within min/max
         for (i in 0 until numberOfBands) {
             val bandLevel = eq.getBandLevel(i.toShort())
             assertTrue(
@@ -46,7 +45,6 @@ class AudioEffectServiceTest {
             )
         }
 
-        // Optional: check first band (deep bass) is higher than mid bands
         val firstBand = eq.getBandLevel(0)
         val midBand = eq.getBandLevel((numberOfBands / 2).toShort())
         assertTrue("Bass band should be stronger than mid band", firstBand > midBand)

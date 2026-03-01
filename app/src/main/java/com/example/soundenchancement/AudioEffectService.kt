@@ -40,21 +40,19 @@ class AudioEffectService : Service() {
                 val (minLevel, maxLevel) = eq.bandLevelRange
 
                 for (i in 0 until numberOfBands) {
-                    val freq = eq.getCenterFreq(i.toShort()) / 1000.0 // Hz
+                    val freq = eq.getCenterFreq(i.toShort()) / 1000.0
 
-                    // Smooth logarithmic / musical scaling
                     val boost = when {
-                        freq <= 60 -> baseLevel * 0.9           // sub-bass
+                        freq <= 60 -> baseLevel * 0.9      
                         freq <= 120 -> baseLevel * 0.7
                         freq <= 250 -> baseLevel * 0.6
-                        freq <= 500 -> baseLevel * 0.35         // low-mids
-                        freq <= 2000 -> baseLevel * 0.4         // mids / vocals
-                        freq <= 4000 -> baseLevel * 0.45        // presence
-                        freq <= 8000 -> baseLevel * 0.7         // upper mids / percussion
-                        else -> baseLevel * 0.8                 // highs / air
+                        freq <= 500 -> baseLevel * 0.35    
+                        freq <= 2000 -> baseLevel * 0.4    
+                        freq <= 4000 -> baseLevel * 0.45   
+                        freq <= 8000 -> baseLevel * 0.7     
+                        else -> baseLevel * 0.8            
                     }
 
-                    // Exponential scaling for smooth, musical sound
                     val scaledBoost = ((boost / 1000.0).pow(1.2) * (maxLevel - minLevel)).roundToInt() + minLevel
                     val bandLevelShort = scaledBoost.coerceIn(minLevel.toInt(), maxLevel.toInt()).toShort()
                     eq.setBandLevel(i.toShort(), bandLevelShort)
