@@ -23,10 +23,10 @@ class MainActivity : AppCompatActivity() {
         fun updateStatus() {
             if (isBassActive) {
                 statusDot.setTextColor(ContextCompat.getColor(this, android.R.color.holo_green_light))
-                statusLabel.text = "Bass Enhancement: ON"
+                statusLabel.text = "Sound effect: ON"
             } else {
-                statusDot.setTextColor(ContextCompat.getColor(this, android.R.color.darker_gray))
-                statusLabel.text = "Bass Enhancement: OFF"
+                statusDot.setTextColor(ContextCompat.getColor(this, android.R.color.holo_red_light))
+                statusLabel.text = "Sound effect: OFF"
             }
         }
 
