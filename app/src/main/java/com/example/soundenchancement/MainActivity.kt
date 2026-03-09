@@ -19,22 +19,25 @@ class MainActivity : AppCompatActivity() {
     private var isBound = false
     private var isEqActive = false
 
-    // Each entry: (seekBarId, dBLabelId, freqLabelId)
+    // (seekBarId, dBLabelId, freqLabelId) — must match activity_main.xml
     private val bandViews = listOf(
-        Triple(R.id.band0,  R.id.label0,  R.id.freq0),
-        Triple(R.id.band1,  R.id.label1,  R.id.freq1),
-        Triple(R.id.band2,  R.id.label2,  R.id.freq2),
-        Triple(R.id.band3,  R.id.label3,  R.id.freq3),
-        Triple(R.id.band4,  R.id.label4,  R.id.freq4),
-        Triple(R.id.band5,  R.id.label5,  R.id.freq5),
-        Triple(R.id.band6,  R.id.label6,  R.id.freq6),
-        Triple(R.id.band7,  R.id.label7,  R.id.freq7),
+        Triple(R.id.band0, R.id.label0, R.id.freq0),
+        Triple(R.id.band1, R.id.label1, R.id.freq1),
+        Triple(R.id.band2, R.id.label2, R.id.freq2),
+        Triple(R.id.band3, R.id.label3, R.id.freq3),
+        Triple(R.id.band4, R.id.label4, R.id.freq4),
+        Triple(R.id.band5, R.id.label5, R.id.freq5),
+        Triple(R.id.band6, R.id.label6, R.id.freq6),
+        Triple(R.id.band7, R.id.label7, R.id.freq7),
     )
 
     private val connection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName?, binder: IBinder?) {
             service = (binder as AudioEffectService.LocalBinder).getService()
             isBound = true
+            // Service is running and bound — treat EQ as active
+            isEqActive = true
+            updateStatus()
             populateBands()
         }
 
@@ -48,17 +51,22 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        val btnStart  = findViewById<Button>(R.id.btnStart)
-        val btnStop   = findViewById<Button>(R.id.btnStop)
-
-        btnStart.setOnClickListener {
-            startService(Intent(this, AudioEffectService::class.java))
-            bindToService()
-            isEqActive = true
-            updateStatus()
+        findViewById<Button>(R.id.btnStart).setOnClickListener {
+            // Start the service (foreground), then bind to it
+            val intent = Intent(this, AudioEffectService::class.java)
+            startService(intent)
+            if (!isBound) {
+                bindService(intent, connection, Context.BIND_AUTO_CREATE)
+            } else {
+                // Already bound — just re-enable EQ and refresh UI
+                service?.enableEqualizer()
+                isEqActive = true
+                updateStatus()
+                populateBands()
+            }
         }
 
-        btnStop.setOnClickListener {
+        findViewById<Button>(R.id.btnStop).setOnClickListener {
             service?.disableEqualizer()
             isEqActive = false
             updateStatus()
@@ -67,69 +75,66 @@ class MainActivity : AppCompatActivity() {
         updateStatus()
     }
 
-    override fun onStart() {
-        super.onStart()
-        // Bind if service is already running
-        bindToService()
-    }
-
     override fun onStop() {
         super.onStop()
         if (isBound) {
             unbindService(connection)
             isBound = false
+            service = null
         }
-    }
-
-    private fun bindToService() {
-        val intent = Intent(this, AudioEffectService::class.java)
-        bindService(intent, connection, Context.BIND_AUTO_CREATE)
     }
 
     private fun populateBands() {
         val svc = service ?: return
-        val bandInfo = svc.getBandInfo()
+        val bandInfo = svc.getBandInfo()           // List<Pair<Int, Int>>  (index, freqHz)
         val (minMb, maxMb) = svc.getBandLevelRange()
 
         bandViews.forEachIndexed { index, (seekId, labelId, freqId) ->
-            val seekBar  = findViewById<SeekBar>(seekId)
-            val dbLabel  = findViewById<TextView>(labelId)
+            // Skip if device has fewer bands than our 8 slots
+            val (_, freqHz) = bandInfo.getOrNull(index) ?: return@forEachIndexed
+
+            val seekBar   = findViewById<SeekBar>(seekId)
+            val dbLabel   = findViewById<TextView>(labelId)
             val freqLabel = findViewById<TextView>(freqId)
 
-            val freqHz = bandInfo.getOrNull(index)?.second ?: return@forEachIndexed
+            // Frequency label (e.g. "60 Hz", "1k Hz")
+            freqLabel.text = formatFreqHz(freqHz)
 
-            // Set frequency label
-            freqLabel.text = formatFreq(freqHz)
+            // Set slider to current EQ value — suppress listener during init
+            seekBar.setOnSeekBarChangeListener(null)
+            val initProgress = svc.getSliderValueForBand(index)
+            seekBar.progress = initProgress
+            dbLabel.text = progressToDb(initProgress, minMb, maxMb)
 
-            // Set initial slider position from current EQ value
-            val initSlider = svc.getSliderValueForBand(index)
-            seekBar.progress = initSlider
-            dbLabel.text = sliderToDb(initSlider, minMb, maxMb)
-
+            // Wire live interaction
             seekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
                 override fun onProgressChanged(sb: SeekBar, progress: Int, fromUser: Boolean) {
-                    dbLabel.text = sliderToDb(progress, minMb, maxMb)
-                    if (isEqActive) {
-                        service?.setBandFromSlider(index, progress)
-                    }
+                    dbLabel.text = progressToDb(progress, minMb, maxMb)
+                    // Always apply — EQ object is always present when bound
+                    service?.setBandFromSlider(index, progress)
                 }
                 override fun onStartTrackingTouch(sb: SeekBar) {}
-                override fun onStopTrackingTouch(sb: SeekBar) {
-                    // Apply even if EQ was off — live preview
-                    service?.setBandFromSlider(index, sb.progress)
-                }
+                override fun onStopTrackingTouch(sb: SeekBar) {}
             })
         }
     }
 
-    private fun sliderToDb(progress: Int, minMb: Short, maxMb: Short): String {
-        val db = (minMb + (progress / 100f) * (maxMb - minMb)) / 100f
-        val sign = if (db >= 0) "+" else ""
+    /**
+     * Maps 0–100 slider progress to a dB string using the device's actual mB range.
+     * e.g. range -1500..1500 mB → -15.0..+15.0 dB
+     */
+    private fun progressToDb(progress: Int, minMb: Short, maxMb: Short): String {
+        val mb = minMb + (progress / 100f) * (maxMb - minMb)
+        val db = mb / 100f
+        val sign = if (db >= 0f) "+" else ""
         return "$sign${db.roundToInt()} dB"
     }
 
-    private fun formatFreq(hz: Float): String {
-        return if (hz >= 1000f) "${(hz / 1000f).roundToInt()}k" else "${hz.roundToInt()}"
+    /**
+     * Format Hz value for display: below 1000 → "60 Hz", above → "1k Hz"
+     */
+    private fun formatFreqHz(hz: Int): String {
+        return if (hz >= 1000) "${hz / 1000}k" else "$hz"
     }
 
     private fun updateStatus() {
