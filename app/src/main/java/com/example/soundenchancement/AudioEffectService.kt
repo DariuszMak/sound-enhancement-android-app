@@ -38,7 +38,9 @@ class AudioEffectService : Service() {
 
             equalizer?.let { eq ->
                 val numberOfBands = eq.numberOfBands
-                val (minLevel, maxLevel) = eq.bandLevelRange
+                val range = eq.bandLevelRange
+                val minLevel = range[0]
+                val maxLevel = range[1]
 
                 for (i in 0 until numberOfBands) {
                     val freq = eq.getCenterFreq(i.toShort()) / 1000.0
@@ -71,7 +73,9 @@ class AudioEffectService : Service() {
     fun setBandFromSlider(bandIndex: Int, sliderValue: Int) {
         val eq = equalizer ?: return
         try {
-            val (minLevel, maxLevel) = eq.bandLevelRange
+            val range = eq.bandLevelRange
+            val minLevel = range[0]
+            val maxLevel = range[1]
             val mapped = (minLevel + (sliderValue / 100f) * (maxLevel - minLevel)).roundToInt()
                 .coerceIn(minLevel.toInt(), maxLevel.toInt())
                 .toShort()
@@ -87,7 +91,9 @@ class AudioEffectService : Service() {
     fun getSliderValueForBand(bandIndex: Int): Int {
         val eq = equalizer ?: return 50
         return try {
-            val (minLevel, maxLevel) = eq.bandLevelRange
+            val range = eq.bandLevelRange
+            val minLevel = range[0]
+            val maxLevel = range[1]
             val current = eq.getBandLevel(bandIndex.toShort()).toInt()
             ((current - minLevel).toFloat() / (maxLevel - minLevel) * 100).roundToInt()
                 .coerceIn(0, 100)
@@ -110,7 +116,8 @@ class AudioEffectService : Service() {
      * Returns the device's EQ range in millibels, e.g. -1500 to 1500.
      */
     fun getBandLevelRange(): Pair<Short, Short> {
-        return equalizer?.bandLevelRange ?: Pair(-1500, 1500)
+        val range = equalizer?.bandLevelRange
+        return if (range != null) Pair(range[0], range[1]) else Pair(-1500, 1500)
     }
 
     fun enableEqualizer() {
