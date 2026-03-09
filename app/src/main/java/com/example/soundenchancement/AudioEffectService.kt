@@ -14,7 +14,8 @@ import kotlin.math.roundToInt
 class AudioEffectService : Service() {
 
     private val binder = LocalBinder()
-    private var equalizer: Equalizer? = null
+    var equalizer: Equalizer? = null
+        private set
 
     inner class LocalBinder : android.os.Binder() {
         fun getService(): AudioEffectService = this@AudioEffectService
@@ -24,12 +25,12 @@ class AudioEffectService : Service() {
 
     override fun onCreate() {
         super.onCreate()
-        startForegroundService()
-        enableProfessionalDynamicBass()
-        Log.d("AudioBoostService", "Dynamic Bass Enabled")
+        startForegroundNotification()
+        initEqualizer()
+        Log.d("AudioEffectService", "Equalizer initialized")
     }
 
-    private fun enableProfessionalDynamicBass(baseLevel: Int = 700) {
+    fun initEqualizer(baseLevel: Int = 700) {
         try {
             equalizer?.release()
             equalizer = Equalizer(0, 0)
@@ -43,26 +44,81 @@ class AudioEffectService : Service() {
                     val freq = eq.getCenterFreq(i.toShort()) / 1000.0
 
                     val boost = when {
-                        freq <= 60 -> baseLevel * 1.1
-                        freq <= 120 -> baseLevel * 0.9
-                        freq <= 250 -> baseLevel * 0.7
-                        freq <= 500 -> baseLevel * 0.4
+                        freq <= 60   -> baseLevel * 1.1
+                        freq <= 120  -> baseLevel * 0.9
+                        freq <= 250  -> baseLevel * 0.7
+                        freq <= 500  -> baseLevel * 0.4
                         freq <= 2000 -> baseLevel * 0.4
                         freq <= 4000 -> baseLevel * 0.45
                         freq <= 8000 -> baseLevel * 0.7
-                        else -> baseLevel * 0.8
+                        else         -> baseLevel * 0.8
                     }
 
                     val scaledBoost = ((boost / 1000.0).pow(1.2) * (maxLevel - minLevel)).roundToInt() + minLevel
-                    val bandLevelShort = scaledBoost.coerceIn(minLevel.toInt(), maxLevel.toInt()).toShort()
-                    eq.setBandLevel(i.toShort(), bandLevelShort)
+                    val bandLevel = scaledBoost.coerceIn(minLevel.toInt(), maxLevel.toInt()).toShort()
+                    eq.setBandLevel(i.toShort(), bandLevel)
                 }
             }
-
-            Log.d("AudioBoostService", "Professional dynamic bass + enhanced clarity applied (smoothed)")
         } catch (e: Exception) {
-            Log.e("AudioBoostService", "Error applying professional dynamic bass + clarity", e)
+            Log.e("AudioEffectService", "Error initializing equalizer", e)
         }
+    }
+
+    /**
+     * Sets a specific band level from a 0–100 slider value.
+     * Maps 0 → minLevel, 100 → maxLevel of the device's equalizer range.
+     */
+    fun setBandFromSlider(bandIndex: Int, sliderValue: Int) {
+        val eq = equalizer ?: return
+        try {
+            val (minLevel, maxLevel) = eq.bandLevelRange
+            val mapped = (minLevel + (sliderValue / 100f) * (maxLevel - minLevel)).roundToInt()
+                .coerceIn(minLevel.toInt(), maxLevel.toInt())
+                .toShort()
+            eq.setBandLevel(bandIndex.toShort(), mapped)
+        } catch (e: Exception) {
+            Log.e("AudioEffectService", "Error setting band $bandIndex", e)
+        }
+    }
+
+    /**
+     * Returns the current band level as a 0–100 slider value.
+     */
+    fun getSliderValueForBand(bandIndex: Int): Int {
+        val eq = equalizer ?: return 50
+        return try {
+            val (minLevel, maxLevel) = eq.bandLevelRange
+            val current = eq.getBandLevel(bandIndex.toShort()).toInt()
+            ((current - minLevel).toFloat() / (maxLevel - minLevel) * 100).roundToInt()
+                .coerceIn(0, 100)
+        } catch (e: Exception) {
+            50
+        }
+    }
+
+    /**
+     * Returns band count and center frequencies (in Hz) for display.
+     */
+    fun getBandInfo(): List<Pair<Int, Float>> {
+        val eq = equalizer ?: return emptyList()
+        return (0 until eq.numberOfBands).map { i ->
+            i to eq.getCenterFreq(i.toShort()) / 1000f
+        }
+    }
+
+    /**
+     * Returns the device's EQ range in millibels, e.g. -1500 to 1500.
+     */
+    fun getBandLevelRange(): Pair<Short, Short> {
+        return equalizer?.bandLevelRange ?: Pair(-1500, 1500)
+    }
+
+    fun enableEqualizer() {
+        equalizer?.enabled = true
+    }
+
+    fun disableEqualizer() {
+        equalizer?.enabled = false
     }
 
     override fun onDestroy() {
@@ -70,12 +126,12 @@ class AudioEffectService : Service() {
             equalizer?.release()
             equalizer = null
         } catch (e: Exception) {
-            Log.e("AudioBoostService", "Error releasing Equalizer", e)
+            Log.e("AudioEffectService", "Error releasing Equalizer", e)
         }
         super.onDestroy()
     }
 
-    private fun startForegroundService() {
+    private fun startForegroundNotification() {
         val channelId = "boost_channel"
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -84,8 +140,7 @@ class AudioEffectService : Service() {
                 "Bass Booster",
                 NotificationManager.IMPORTANCE_LOW
             )
-            val manager = getSystemService(NotificationManager::class.java)
-            manager.createNotificationChannel(channel)
+            getSystemService(NotificationManager::class.java).createNotificationChannel(channel)
         }
 
         val notification: Notification = NotificationCompat.Builder(this, channelId)
@@ -96,11 +151,7 @@ class AudioEffectService : Service() {
             .build()
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            startForeground(
-                1,
-                notification,
-                ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK
-            )
+            startForeground(1, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK)
         } else {
             startForeground(1, notification)
         }

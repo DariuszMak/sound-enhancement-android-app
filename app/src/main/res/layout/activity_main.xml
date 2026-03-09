@@ -25,9 +25,7 @@
             android:textStyle="bold"
             android:letterSpacing="0.15"/>
 
-        <!-- Status pill -->
         <LinearLayout
-            android:id="@+id/statusPill"
             android:orientation="horizontal"
             android:gravity="center_vertical"
             android:layout_width="wrap_content"
@@ -59,7 +57,6 @@
         </LinearLayout>
     </LinearLayout>
 
-    <!-- Preset label -->
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -67,9 +64,9 @@
         android:textColor="#333344"
         android:textSize="11sp"
         android:letterSpacing="0.12"
-        android:layout_marginBottom="24dp"/>
+        android:layout_marginBottom="20dp"/>
 
-    <!-- EQ Bands -->
+    <!-- EQ Band sliders -->
     <LinearLayout
         android:orientation="horizontal"
         android:layout_width="match_parent"
@@ -77,170 +74,162 @@
         android:layout_weight="1"
         android:gravity="center_horizontal">
 
-        <!-- Band 1: 60Hz -->
+        <!-- Band 0 -->
         <LinearLayout android:orientation="vertical" android:gravity="center_horizontal"
             android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1">
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:text="+8" android:textColor="#00E5FF" android:textSize="10sp" android:layout_marginBottom="4dp"/>
-            <SeekBar
-                android:id="@+id/band60"
-                android:layout_width="24dp"
-                android:layout_height="160dp"
-                android:rotation="270"
-                android:progress="88"
-                android:max="100"
-                android:progressTint="#00E5FF"
-                android:thumbTint="#00E5FF"
+            <TextView android:id="@+id/label0"
+                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="0 dB" android:textColor="#00E5FF" android:textSize="9sp"
+                android:layout_marginBottom="4dp"/>
+            <SeekBar android:id="@+id/band0"
+                android:layout_width="24dp" android:layout_height="160dp"
+                android:rotation="270" android:max="100"
+                android:progressTint="#00E5FF" android:thumbTint="#00E5FF"
                 android:progressBackgroundTint="#1A2A2A"/>
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:text="60" android:textColor="#555566" android:textSize="10sp" android:layout_marginTop="8dp"/>
+            <TextView android:id="@+id/freq0"
+                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="—" android:textColor="#555566" android:textSize="10sp"
+                android:layout_marginTop="8dp"/>
             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                 android:text="Hz" android:textColor="#333344" android:textSize="9sp"/>
         </LinearLayout>
 
-        <!-- Band 2: 120Hz -->
+        <!-- Band 1 -->
         <LinearLayout android:orientation="vertical" android:gravity="center_horizontal"
             android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1">
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:text="+6" android:textColor="#00E5FF" android:textSize="10sp" android:layout_marginBottom="4dp"/>
-            <SeekBar
-                android:id="@+id/band120"
-                android:layout_width="24dp"
-                android:layout_height="160dp"
-                android:rotation="270"
-                android:progress="72"
-                android:max="100"
-                android:progressTint="#00E5FF"
-                android:thumbTint="#00E5FF"
+            <TextView android:id="@+id/label1"
+                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="0 dB" android:textColor="#00CCEE" android:textSize="9sp"
+                android:layout_marginBottom="4dp"/>
+            <SeekBar android:id="@+id/band1"
+                android:layout_width="24dp" android:layout_height="160dp"
+                android:rotation="270" android:max="100"
+                android:progressTint="#00CCEE" android:thumbTint="#00CCEE"
                 android:progressBackgroundTint="#1A2A2A"/>
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:text="120" android:textColor="#555566" android:textSize="10sp" android:layout_marginTop="8dp"/>
+            <TextView android:id="@+id/freq1"
+                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="—" android:textColor="#555566" android:textSize="10sp"
+                android:layout_marginTop="8dp"/>
             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                 android:text="Hz" android:textColor="#333344" android:textSize="9sp"/>
         </LinearLayout>
 
-        <!-- Band 3: 250Hz -->
+        <!-- Band 2 -->
         <LinearLayout android:orientation="vertical" android:gravity="center_horizontal"
             android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1">
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:text="+4" android:textColor="#00BFFF" android:textSize="10sp" android:layout_marginBottom="4dp"/>
-            <SeekBar
-                android:id="@+id/band250"
-                android:layout_width="24dp"
-                android:layout_height="160dp"
-                android:rotation="270"
-                android:progress="55"
-                android:max="100"
-                android:progressTint="#00BFFF"
-                android:thumbTint="#00BFFF"
+            <TextView android:id="@+id/label2"
+                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="0 dB" android:textColor="#00AADD" android:textSize="9sp"
+                android:layout_marginBottom="4dp"/>
+            <SeekBar android:id="@+id/band2"
+                android:layout_width="24dp" android:layout_height="160dp"
+                android:rotation="270" android:max="100"
+                android:progressTint="#00AADD" android:thumbTint="#00AADD"
                 android:progressBackgroundTint="#1A2A2A"/>
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:text="250" android:textColor="#555566" android:textSize="10sp" android:layout_marginTop="8dp"/>
+            <TextView android:id="@+id/freq2"
+                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="—" android:textColor="#555566" android:textSize="10sp"
+                android:layout_marginTop="8dp"/>
             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                 android:text="Hz" android:textColor="#333344" android:textSize="9sp"/>
         </LinearLayout>
 
-        <!-- Band 4: 500Hz -->
+        <!-- Band 3 -->
         <LinearLayout android:orientation="vertical" android:gravity="center_horizontal"
             android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1">
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:text="+2" android:textColor="#7B9FFF" android:textSize="10sp" android:layout_marginBottom="4dp"/>
-            <SeekBar
-                android:id="@+id/band500"
-                android:layout_width="24dp"
-                android:layout_height="160dp"
-                android:rotation="270"
-                android:progress="38"
-                android:max="100"
-                android:progressTint="#7B9FFF"
-                android:thumbTint="#7B9FFF"
+            <TextView android:id="@+id/label3"
+                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="0 dB" android:textColor="#7B9FFF" android:textSize="9sp"
+                android:layout_marginBottom="4dp"/>
+            <SeekBar android:id="@+id/band3"
+                android:layout_width="24dp" android:layout_height="160dp"
+                android:rotation="270" android:max="100"
+                android:progressTint="#7B9FFF" android:thumbTint="#7B9FFF"
                 android:progressBackgroundTint="#1A2A2A"/>
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:text="500" android:textColor="#555566" android:textSize="10sp" android:layout_marginTop="8dp"/>
+            <TextView android:id="@+id/freq3"
+                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="—" android:textColor="#555566" android:textSize="10sp"
+                android:layout_marginTop="8dp"/>
             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                 android:text="Hz" android:textColor="#333344" android:textSize="9sp"/>
         </LinearLayout>
 
-        <!-- Band 5: 2kHz -->
+        <!-- Band 4 -->
         <LinearLayout android:orientation="vertical" android:gravity="center_horizontal"
             android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1">
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:text="+2" android:textColor="#7B9FFF" android:textSize="10sp" android:layout_marginBottom="4dp"/>
-            <SeekBar
-                android:id="@+id/band2k"
-                android:layout_width="24dp"
-                android:layout_height="160dp"
-                android:rotation="270"
-                android:progress="38"
-                android:max="100"
-                android:progressTint="#7B9FFF"
-                android:thumbTint="#7B9FFF"
+            <TextView android:id="@+id/label4"
+                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="0 dB" android:textColor="#9B8FFF" android:textSize="9sp"
+                android:layout_marginBottom="4dp"/>
+            <SeekBar android:id="@+id/band4"
+                android:layout_width="24dp" android:layout_height="160dp"
+                android:rotation="270" android:max="100"
+                android:progressTint="#9B8FFF" android:thumbTint="#9B8FFF"
                 android:progressBackgroundTint="#1A2A2A"/>
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:text="2k" android:textColor="#555566" android:textSize="10sp" android:layout_marginTop="8dp"/>
+            <TextView android:id="@+id/freq4"
+                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="—" android:textColor="#555566" android:textSize="10sp"
+                android:layout_marginTop="8dp"/>
             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                 android:text="Hz" android:textColor="#333344" android:textSize="9sp"/>
         </LinearLayout>
 
-        <!-- Band 6: 4kHz -->
+        <!-- Band 5 -->
         <LinearLayout android:orientation="vertical" android:gravity="center_horizontal"
             android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1">
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:text="+3" android:textColor="#B57BFF" android:textSize="10sp" android:layout_marginBottom="4dp"/>
-            <SeekBar
-                android:id="@+id/band4k"
-                android:layout_width="24dp"
-                android:layout_height="160dp"
-                android:rotation="270"
-                android:progress="46"
-                android:max="100"
-                android:progressTint="#B57BFF"
-                android:thumbTint="#B57BFF"
+            <TextView android:id="@+id/label5"
+                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="0 dB" android:textColor="#B57BFF" android:textSize="9sp"
+                android:layout_marginBottom="4dp"/>
+            <SeekBar android:id="@+id/band5"
+                android:layout_width="24dp" android:layout_height="160dp"
+                android:rotation="270" android:max="100"
+                android:progressTint="#B57BFF" android:thumbTint="#B57BFF"
                 android:progressBackgroundTint="#1A2A2A"/>
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:text="4k" android:textColor="#555566" android:textSize="10sp" android:layout_marginTop="8dp"/>
+            <TextView android:id="@+id/freq5"
+                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="—" android:textColor="#555566" android:textSize="10sp"
+                android:layout_marginTop="8dp"/>
             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                 android:text="Hz" android:textColor="#333344" android:textSize="9sp"/>
         </LinearLayout>
 
-        <!-- Band 7: 8kHz -->
+        <!-- Band 6 -->
         <LinearLayout android:orientation="vertical" android:gravity="center_horizontal"
             android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1">
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:text="+5" android:textColor="#FF7BCA" android:textSize="10sp" android:layout_marginBottom="4dp"/>
-            <SeekBar
-                android:id="@+id/band8k"
-                android:layout_width="24dp"
-                android:layout_height="160dp"
-                android:rotation="270"
-                android:progress="62"
-                android:max="100"
-                android:progressTint="#FF7BCA"
-                android:thumbTint="#FF7BCA"
+            <TextView android:id="@+id/label6"
+                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="0 dB" android:textColor="#DD6FEE" android:textSize="9sp"
+                android:layout_marginBottom="4dp"/>
+            <SeekBar android:id="@+id/band6"
+                android:layout_width="24dp" android:layout_height="160dp"
+                android:rotation="270" android:max="100"
+                android:progressTint="#DD6FEE" android:thumbTint="#DD6FEE"
                 android:progressBackgroundTint="#1A2A2A"/>
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:text="8k" android:textColor="#555566" android:textSize="10sp" android:layout_marginTop="8dp"/>
+            <TextView android:id="@+id/freq6"
+                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="—" android:textColor="#555566" android:textSize="10sp"
+                android:layout_marginTop="8dp"/>
             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                 android:text="Hz" android:textColor="#333344" android:textSize="9sp"/>
         </LinearLayout>
 
-        <!-- Band 8: 16kHz -->
+        <!-- Band 7 -->
         <LinearLayout android:orientation="vertical" android:gravity="center_horizontal"
             android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1">
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:text="+6" android:textColor="#FF4488" android:textSize="10sp" android:layout_marginBottom="4dp"/>
-            <SeekBar
-                android:id="@+id/band16k"
-                android:layout_width="24dp"
-                android:layout_height="160dp"
-                android:rotation="270"
-                android:progress="72"
-                android:max="100"
-                android:progressTint="#FF4488"
-                android:thumbTint="#FF4488"
+            <TextView android:id="@+id/label7"
+                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="0 dB" android:textColor="#FF4488" android:textSize="9sp"
+                android:layout_marginBottom="4dp"/>
+            <SeekBar android:id="@+id/band7"
+                android:layout_width="24dp" android:layout_height="160dp"
+                android:rotation="270" android:max="100"
+                android:progressTint="#FF4488" android:thumbTint="#FF4488"
                 android:progressBackgroundTint="#1A2A2A"/>
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                android:text="16k" android:textColor="#555566" android:textSize="10sp" android:layout_marginTop="8dp"/>
+            <TextView android:id="@+id/freq7"
+                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="—" android:textColor="#555566" android:textSize="10sp"
+                android:layout_marginTop="8dp"/>
             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                 android:text="Hz" android:textColor="#333344" android:textSize="9sp"/>
         </LinearLayout>
@@ -252,14 +241,13 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
-        android:text="0 dB ─────────────────── +15 dB"
-        android:textColor="#2A2A3A"
+        android:text="min ─────────────────── max dB"
+        android:textColor="#222233"
         android:textSize="10sp"
-        android:letterSpacing="0.04"
-        android:layout_marginBottom="20dp"
-        android:layout_marginTop="4dp"/>
+        android:layout_marginTop="4dp"
+        android:layout_marginBottom="20dp"/>
 
-    <!-- Power buttons -->
+    <!-- Buttons -->
     <LinearLayout
         android:orientation="horizontal"
         android:layout_width="match_parent"
