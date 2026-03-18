@@ -17,6 +17,9 @@ class MainActivity : AppCompatActivity() {
     // ── State ─────────────────────────────────────────────────────────────────
     internal var isBassActive = false
 
+    // ── Persistence ───────────────────────────────────────────────────────────
+    internal lateinit var eqPrefs: EqPreferences
+
     // ── Service binding ───────────────────────────────────────────────────────
     internal var audioService: AudioEffectService? = null
     private var serviceBound = false
@@ -37,7 +40,7 @@ class MainActivity : AppCompatActivity() {
     internal lateinit var statusLabel: TextView
     internal lateinit var btnStart: Button
     internal lateinit var btnStop: Button
-    internal lateinit var eqPanel: View          // the panel that gets greyed out
+    internal lateinit var eqPanel: View
 
     internal lateinit var sliderBaseLevel: SeekBar
     internal lateinit var labelBaseLevel: TextView
@@ -56,8 +59,6 @@ class MainActivity : AppCompatActivity() {
         "≤ 8000 Hz (Brilliance)",
         "> 8000 Hz (Air)"
     )
-    private val defaultMultipliers =
-        doubleArrayOf(1.10, 0.90, 0.70, 0.40, 0.40, 0.45, 0.70, 0.80)
 
     // ── Lifecycle ─────────────────────────────────────────────────────────────
 
@@ -65,12 +66,18 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        bindWidgets()
-        setupSliderListeners()
+        eqPrefs = EqPreferences(this)
 
-        // Start the service and mark active
-        startService(Intent(this, AudioEffectService::class.java))
-        isBassActive = true
+        bindWidgets()
+        restoreSliderState()      // ← set progress BEFORE attaching listeners
+        setupSliderListeners()    //   so onProgressChanged fires with saved values
+                                  //   and labels are correct immediately
+
+        isBassActive = eqPrefs.loadIsActive()
+
+        if (isBassActive) {
+            startService(Intent(this, AudioEffectService::class.java))
+        }
         refreshUi()
 
         btnStart.setOnClickListener { onStartClicked() }
@@ -79,9 +86,11 @@ class MainActivity : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
-        // Bind WITHOUT auto-create: only connect to an already-running service
-        val intent = Intent(this, AudioEffectService::class.java)
-        bindService(intent, serviceConnection, 0 /* no BIND_AUTO_CREATE */)
+        bindService(
+            Intent(this, AudioEffectService::class.java),
+            serviceConnection,
+            0   // no BIND_AUTO_CREATE — only attach to an already-running service
+        )
     }
 
     override fun onStop() {
@@ -98,41 +107,29 @@ class MainActivity : AppCompatActivity() {
     internal fun onStartClicked() {
         if (!isBassActive) {
             startService(Intent(this, AudioEffectService::class.java))
-            // Re-bind since the service may have been destroyed
             bindService(
                 Intent(this, AudioEffectService::class.java),
                 serviceConnection,
                 BIND_AUTO_CREATE
             )
             isBassActive = true
-            // Apply current slider values once the service is running
-            audioService?.enableEq() ?: run {
-                // Service will apply defaults on onCreate; push slider values after bind
-                postApplyOnBind = true
-            }
+            eqPrefs.saveIsActive(true)
+            audioService?.enableEq()
             refreshUi()
         }
     }
 
-    /** Whether to push slider config the moment the service connects. */
-    private var postApplyOnBind = false
-
     internal fun onStopClicked() {
         if (isBassActive) {
-            // Disable the EQ effect without stopping the service process.
-            // stopService() alone does NOT un-apply the Equalizer — the audio
-            // effect lives in the hardware session until enabled = false.
             audioService?.disableEq()
             isBassActive = false
+            eqPrefs.saveIsActive(false)
             refreshUi()
         }
     }
 
     // ── UI helpers ────────────────────────────────────────────────────────────
 
-    /**
-     * Updates status dot/label colour and enables or disables the EQ panel.
-     */
     internal fun refreshUi() {
         if (isBassActive) {
             statusDot.setTextColor(
@@ -147,7 +144,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    /** Recursively enables/disables all interactive children inside [eqPanel]. */
     private fun setEqPanelEnabled(enabled: Boolean) {
         eqPanel.alpha = if (enabled) 1f else 0.38f
         setGroupEnabled(eqPanel, enabled)
@@ -186,20 +182,30 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * Pushes saved progress values onto sliders BEFORE listeners are attached.
+     * Setting [SeekBar.setProgress] here will later trigger [onProgressChanged]
+     * inside [setupSliderListeners], which updates the labels automatically.
+     */
+    internal fun restoreSliderState() {
+        sliderBaseLevel.progress = eqPrefs.loadBaseLevel()
+        for (i in 0 until 8) {
+            bandSliders[i]?.progress = eqPrefs.loadBandProgress(i)
+        }
+    }
+
     private fun setupSliderListeners() {
-        // Base level slider
         sliderBaseLevel.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(sb: SeekBar?, progress: Int, fromUser: Boolean) {
                 labelBaseLevel.text = "Base Level: $progress mB"
             }
             override fun onStartTrackingTouch(sb: SeekBar?) {}
-            /** Apply immediately when the user lifts their finger. */
             override fun onStopTrackingTouch(sb: SeekBar?) {
+                eqPrefs.saveBaseLevel(sliderBaseLevel.progress)
                 if (isBassActive) audioService?.applyConfig(buildConfigFromSliders())
             }
         })
 
-        // Per-band sliders
         for (i in 0 until 8) {
             val index = i
             bandSliders[i]?.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
@@ -209,8 +215,8 @@ class MainActivity : AppCompatActivity() {
                         "${bandNames[index]}: ${"%.2f".format(multiplier)}×"
                 }
                 override fun onStartTrackingTouch(sb: SeekBar?) {}
-                /** Apply immediately when the user lifts their finger. */
                 override fun onStopTrackingTouch(sb: SeekBar?) {
+                    eqPrefs.saveBandProgress(index, bandSliders[index]?.progress ?: 0)
                     if (isBassActive) audioService?.applyConfig(buildConfigFromSliders())
                 }
             })
@@ -219,12 +225,11 @@ class MainActivity : AppCompatActivity() {
 
     // ── Config builder ────────────────────────────────────────────────────────
 
-    /** Reads current slider positions and constructs an [EqConfig]. */
     internal fun buildConfigFromSliders(): EqConfig {
         val baseLevel = sliderBaseLevel.progress
         val multipliers = DoubleArray(8) { i ->
             (bandSliders[i]?.progress
-                ?: (defaultMultipliers[i] * 100).toInt()) / 100.0
+                ?: EqPreferences.DEFAULT_BAND_PROGRESS[i]) / 100.0
         }
         return EqConfig(baseLevel = baseLevel, multipliers = multipliers)
     }
