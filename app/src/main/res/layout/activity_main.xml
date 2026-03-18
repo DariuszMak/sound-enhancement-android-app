@@ -56,9 +56,7 @@
             android:backgroundTint="#F44336"
             android:textColor="#FFFFFF"/>
 
-        <!-- ══════════════════════════════════════════════════════════════════
-             EQ panel — this entire block is greyed out when effect is OFF.
-             ══════════════════════════════════════════════════════════════════ -->
+        <!-- ══ EQ panel — greyed out when effect is OFF ══ -->
         <LinearLayout
             android:id="@+id/eqPanel"
             android:orientation="vertical"
@@ -66,13 +64,33 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="24dp">
 
-            <TextView
+            <!-- EQ header + reset button on same row -->
+            <LinearLayout
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="EQ Settings"
-                android:textSize="16sp"
-                android:textStyle="bold"
-                android:layout_marginBottom="8dp"/>
+                android:layout_marginBottom="8dp">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="EQ Settings"
+                    android:textSize="16sp"
+                    android:textStyle="bold"/>
+
+                <Button
+                    android:id="@+id/btnReset"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Reset to defaults"
+                    android:backgroundTint="#9E9E9E"
+                    android:textColor="#FFFFFF"
+                    android:textSize="12sp"
+                    style="@style/Widget.MaterialComponents.Button.TextButton"/>
+
+            </LinearLayout>
 
             <!-- Base level -->
             <TextView
@@ -98,7 +116,6 @@
                 android:textSize="13sp"
                 android:layout_marginBottom="4dp"/>
 
-            <!-- Band 0 — ≤ 60 Hz, default 1.10 → progress 110 -->
             <TextView
                 android:id="@+id/labelBand0"
                 android:layout_width="match_parent"
@@ -112,7 +129,6 @@
                 android:progress="110"
                 android:layout_marginBottom="12dp"/>
 
-            <!-- Band 1 — ≤ 120 Hz, default 0.90 → progress 90 -->
             <TextView
                 android:id="@+id/labelBand1"
                 android:layout_width="match_parent"
@@ -126,7 +142,6 @@
                 android:progress="90"
                 android:layout_marginBottom="12dp"/>
 
-            <!-- Band 2 — ≤ 250 Hz, default 0.70 → progress 70 -->
             <TextView
                 android:id="@+id/labelBand2"
                 android:layout_width="match_parent"
@@ -140,7 +155,6 @@
                 android:progress="70"
                 android:layout_marginBottom="12dp"/>
 
-            <!-- Band 3 — ≤ 500 Hz, default 0.40 → progress 40 -->
             <TextView
                 android:id="@+id/labelBand3"
                 android:layout_width="match_parent"
@@ -154,7 +168,6 @@
                 android:progress="40"
                 android:layout_marginBottom="12dp"/>
 
-            <!-- Band 4 — ≤ 2000 Hz, default 0.40 → progress 40 -->
             <TextView
                 android:id="@+id/labelBand4"
                 android:layout_width="match_parent"
@@ -168,7 +181,6 @@
                 android:progress="40"
                 android:layout_marginBottom="12dp"/>
 
-            <!-- Band 5 — ≤ 4000 Hz, default 0.45 → progress 45 -->
             <TextView
                 android:id="@+id/labelBand5"
                 android:layout_width="match_parent"
@@ -182,7 +194,6 @@
                 android:progress="45"
                 android:layout_marginBottom="12dp"/>
 
-            <!-- Band 6 — ≤ 8000 Hz, default 0.70 → progress 70 -->
             <TextView
                 android:id="@+id/labelBand6"
                 android:layout_width="match_parent"
@@ -196,7 +207,6 @@
                 android:progress="70"
                 android:layout_marginBottom="12dp"/>
 
-            <!-- Band 7 — > 8000 Hz, default 0.80 → progress 80 -->
             <TextView
                 android:id="@+id/labelBand7"
                 android:layout_width="match_parent"
@@ -211,7 +221,6 @@
                 android:layout_marginBottom="12dp"/>
 
         </LinearLayout>
-        <!-- end eqPanel -->
 
     </LinearLayout>
 </ScrollView>

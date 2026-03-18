@@ -40,6 +40,7 @@ class MainActivity : AppCompatActivity() {
     internal lateinit var statusLabel: TextView
     internal lateinit var btnStart: Button
     internal lateinit var btnStop: Button
+    internal lateinit var btnReset: Button
     internal lateinit var eqPanel: View
 
     internal lateinit var sliderBaseLevel: SeekBar
@@ -69,19 +70,17 @@ class MainActivity : AppCompatActivity() {
         eqPrefs = EqPreferences(this)
 
         bindWidgets()
-        restoreSliderState()      // ← set progress BEFORE attaching listeners
-        setupSliderListeners()    //   so onProgressChanged fires with saved values
-                                  //   and labels are correct immediately
+        setupSliderListeners()        // attach listeners FIRST …
+        restoreSliderState()          // … then set progress so onProgressChanged
+                                      //   fires and labels update immediately
 
         isBassActive = eqPrefs.loadIsActive()
-
-        if (isBassActive) {
-            startService(Intent(this, AudioEffectService::class.java))
-        }
+        if (isBassActive) startService(Intent(this, AudioEffectService::class.java))
         refreshUi()
 
         btnStart.setOnClickListener { onStartClicked() }
         btnStop.setOnClickListener  { onStopClicked()  }
+        btnReset.setOnClickListener { onResetClicked() }
     }
 
     override fun onStart() {
@@ -128,6 +127,25 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * Resets all sliders to factory defaults, persists them, and re-applies
+     * the EQ immediately if the effect is currently active.
+     */
+    internal fun onResetClicked() {
+        sliderBaseLevel.progress = EqPreferences.DEFAULT_BASE_LEVEL
+        for (i in 0 until 8) {
+            bandSliders[i]?.progress = EqPreferences.DEFAULT_BAND_PROGRESS[i]
+        }
+        // Labels were already updated by the onProgressChanged listeners above.
+        // Persist the reset values.
+        eqPrefs.saveBaseLevel(EqPreferences.DEFAULT_BASE_LEVEL)
+        for (i in 0 until 8) {
+            eqPrefs.saveBandProgress(i, EqPreferences.DEFAULT_BAND_PROGRESS[i])
+        }
+        // Apply immediately if active.
+        if (isBassActive) audioService?.applyConfig(buildConfigFromSliders())
+    }
+
     // ── UI helpers ────────────────────────────────────────────────────────────
 
     internal fun refreshUi() {
@@ -163,6 +181,7 @@ class MainActivity : AppCompatActivity() {
         statusLabel = findViewById(R.id.statusLabel)
         btnStart    = findViewById(R.id.btnStart)
         btnStop     = findViewById(R.id.btnStop)
+        btnReset    = findViewById(R.id.btnReset)
         eqPanel     = findViewById(R.id.eqPanel)
 
         sliderBaseLevel = findViewById(R.id.sliderBaseLevel)
@@ -182,18 +201,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    /**
-     * Pushes saved progress values onto sliders BEFORE listeners are attached.
-     * Setting [SeekBar.setProgress] here will later trigger [onProgressChanged]
-     * inside [setupSliderListeners], which updates the labels automatically.
-     */
-    internal fun restoreSliderState() {
-        sliderBaseLevel.progress = eqPrefs.loadBaseLevel()
-        for (i in 0 until 8) {
-            bandSliders[i]?.progress = eqPrefs.loadBandProgress(i)
-        }
-    }
-
     private fun setupSliderListeners() {
         sliderBaseLevel.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(sb: SeekBar?, progress: Int, fromUser: Boolean) {
@@ -210,9 +217,8 @@ class MainActivity : AppCompatActivity() {
             val index = i
             bandSliders[i]?.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
                 override fun onProgressChanged(sb: SeekBar?, progress: Int, fromUser: Boolean) {
-                    val multiplier = progress / 100.0
                     bandLabels[index]?.text =
-                        "${bandNames[index]}: ${"%.2f".format(multiplier)}×"
+                        "${bandNames[index]}: ${"%.2f".format(progress / 100.0)}×"
                 }
                 override fun onStartTrackingTouch(sb: SeekBar?) {}
                 override fun onStopTrackingTouch(sb: SeekBar?) {
@@ -223,13 +229,25 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * Restores slider progress from [EqPreferences].
+     * Must be called AFTER [setupSliderListeners] so that [SeekBar.setProgress]
+     * triggers [SeekBar.OnSeekBarChangeListener.onProgressChanged] and label
+     * texts are updated in the same pass.
+     */
+    internal fun restoreSliderState() {
+        sliderBaseLevel.progress = eqPrefs.loadBaseLevel()
+        for (i in 0 until 8) {
+            bandSliders[i]?.progress = eqPrefs.loadBandProgress(i)
+        }
+    }
+
     // ── Config builder ────────────────────────────────────────────────────────
 
     internal fun buildConfigFromSliders(): EqConfig {
         val baseLevel = sliderBaseLevel.progress
         val multipliers = DoubleArray(8) { i ->
-            (bandSliders[i]?.progress
-                ?: EqPreferences.DEFAULT_BAND_PROGRESS[i]) / 100.0
+            (bandSliders[i]?.progress ?: EqPreferences.DEFAULT_BAND_PROGRESS[i]) / 100.0
         }
         return EqConfig(baseLevel = baseLevel, multipliers = multipliers)
     }

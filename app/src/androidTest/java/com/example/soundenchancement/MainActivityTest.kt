@@ -14,16 +14,14 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class MainActivityTest {
 
-    // Clear saved prefs before every test so each starts from a known state.
-    @Before
-    fun clearPrefs() {
+    private fun clearPrefs() {
         ApplicationProvider.getApplicationContext<Context>()
             .getSharedPreferences("eq_settings", Context.MODE_PRIVATE)
             .edit().clear().commit()
     }
 
-    @After
-    fun clearPrefsAfter() = clearPrefs()
+    @Before fun setUp()    = clearPrefs()
+    @After  fun tearDown() = clearPrefs()
 
     // ── Original launch tests ─────────────────────────────────────────────────
 
@@ -31,8 +29,7 @@ class MainActivityTest {
     fun onLaunch_statusShouldShowOn() {
         ActivityScenario.launch(MainActivity::class.java).use { scenario ->
             scenario.onActivity { activity ->
-                val statusLabel = activity.findViewById<TextView>(R.id.statusLabel)
-                assertEquals("Sound effect: ON", statusLabel.text.toString())
+                assertEquals("Sound effect: ON", activity.statusLabel.text.toString())
             }
         }
     }
@@ -91,7 +88,6 @@ class MainActivityTest {
             scenario.onActivity { activity ->
                 activity.btnStop.performClick()
                 activity.btnStart.performClick()
-
                 assertTrue(activity.isBassActive)
                 assertEquals(1f, activity.eqPanel.alpha, 0.01f)
                 assertTrue(activity.sliderBaseLevel.isEnabled)
@@ -125,7 +121,6 @@ class MainActivityTest {
             scenario.onActivity { activity ->
                 activity.sliderBaseLevel.progress = 1000
                 activity.bandSliders[0]?.progress = 150
-
                 val config = activity.buildConfigFromSliders()
                 assertEquals(1000, config.baseLevel)
                 assertEquals(1.50, config.multipliers[0], 0.01)
@@ -161,9 +156,7 @@ class MainActivityTest {
     @Test
     fun isBassActive_isTrueOnFreshLaunch() {
         ActivityScenario.launch(MainActivity::class.java).use { scenario ->
-            scenario.onActivity { activity ->
-                assertTrue(activity.isBassActive)
-            }
+            scenario.onActivity { activity -> assertTrue(activity.isBassActive) }
         }
     }
 
@@ -173,7 +166,6 @@ class MainActivityTest {
             scenario.onActivity { activity ->
                 activity.btnStop.performClick()
                 assertFalse(activity.isBassActive)
-
                 activity.btnStart.performClick()
                 assertTrue(activity.isBassActive)
             }
@@ -186,7 +178,6 @@ class MainActivityTest {
             scenario.onActivity { activity ->
                 activity.btnStop.performClick()
                 activity.btnStop.performClick()
-
                 assertFalse(activity.isBassActive)
                 assertEquals("Sound effect: OFF", activity.statusLabel.text.toString())
             }
@@ -197,41 +188,27 @@ class MainActivityTest {
 
     @Test
     fun sliderValues_areRestoredAfterRelaunch() {
-        // First launch — change values
-        ActivityScenario.launch(MainActivity::class.java).use { scenario ->
-            scenario.onActivity { activity ->
-                activity.sliderBaseLevel.progress = 1100
-                activity.bandSliders[0]?.progress = 180
-                activity.bandSliders[3]?.progress = 60
-                // Simulate finger-up to trigger save
-                activity.eqPrefs.saveBaseLevel(1100)
-                activity.eqPrefs.saveBandProgress(0, 180)
-                activity.eqPrefs.saveBandProgress(3, 60)
-            }
-        }
+        val prefs = EqPreferences(ApplicationProvider.getApplicationContext())
+        prefs.saveBaseLevel(1100)
+        prefs.saveBandProgress(0, 180)
+        prefs.saveBandProgress(3, 60)
 
-        // Second launch — values should be restored
         ActivityScenario.launch(MainActivity::class.java).use { scenario ->
             scenario.onActivity { activity ->
-                assertEquals(
-                    "baseLevel slider should be restored to 1100",
-                    1100, activity.sliderBaseLevel.progress
-                )
-                assertEquals(
-                    "Band 0 slider should be restored to 180",
-                    180, activity.bandSliders[0]?.progress
-                )
-                assertEquals(
-                    "Band 3 slider should be restored to 60",
-                    60, activity.bandSliders[3]?.progress
-                )
+                assertEquals(1100, activity.sliderBaseLevel.progress)
+                assertEquals(180,  activity.bandSliders[0]?.progress)
+                assertEquals(60,   activity.bandSliders[3]?.progress)
             }
         }
     }
 
+    /**
+     * Regression test for the label-not-updated bug.
+     * Listeners must be attached BEFORE restoreSliderState() so that
+     * setProgress() triggers onProgressChanged and labels reflect saved values.
+     */
     @Test
     fun sliderLabels_reflectRestoredValues_onRelaunch() {
-        // Save custom values directly via prefs
         val prefs = EqPreferences(ApplicationProvider.getApplicationContext())
         prefs.saveBaseLevel(900)
         prefs.saveBandProgress(1, 160)   // → 1.60×
@@ -253,16 +230,11 @@ class MainActivityTest {
 
     @Test
     fun isActiveState_isRestoredAfterRelaunch_whenOff() {
-        // Save OFF state
-        val prefs = EqPreferences(ApplicationProvider.getApplicationContext())
-        prefs.saveIsActive(false)
+        EqPreferences(ApplicationProvider.getApplicationContext()).saveIsActive(false)
 
         ActivityScenario.launch(MainActivity::class.java).use { scenario ->
             scenario.onActivity { activity ->
-                assertFalse(
-                    "isBassActive should be false when saved state was OFF",
-                    activity.isBassActive
-                )
+                assertFalse(activity.isBassActive)
                 assertEquals("Sound effect: OFF", activity.statusLabel.text.toString())
                 assertEquals(0.38f, activity.eqPanel.alpha, 0.01f)
             }
@@ -271,15 +243,11 @@ class MainActivityTest {
 
     @Test
     fun isActiveState_isRestoredAfterRelaunch_whenOn() {
-        val prefs = EqPreferences(ApplicationProvider.getApplicationContext())
-        prefs.saveIsActive(true)
+        EqPreferences(ApplicationProvider.getApplicationContext()).saveIsActive(true)
 
         ActivityScenario.launch(MainActivity::class.java).use { scenario ->
             scenario.onActivity { activity ->
-                assertTrue(
-                    "isBassActive should be true when saved state was ON",
-                    activity.isBassActive
-                )
+                assertTrue(activity.isBassActive)
                 assertEquals("Sound effect: ON", activity.statusLabel.text.toString())
                 assertEquals(1f, activity.eqPanel.alpha, 0.01f)
             }
@@ -310,15 +278,133 @@ class MainActivityTest {
     fun buildConfigFromSliders_matchesRestoredPrefs() {
         val prefs = EqPreferences(ApplicationProvider.getApplicationContext())
         prefs.saveBaseLevel(500)
-        prefs.saveBandProgress(0, 120)   // → 1.20×
-        prefs.saveBandProgress(7, 95)    // → 0.95×
+        prefs.saveBandProgress(0, 120)
+        prefs.saveBandProgress(7, 95)
 
         ActivityScenario.launch(MainActivity::class.java).use { scenario ->
             scenario.onActivity { activity ->
                 val config = activity.buildConfigFromSliders()
-                assertEquals(500, config.baseLevel)
+                assertEquals(500,  config.baseLevel)
                 assertEquals(1.20, config.multipliers[0], 0.01)
                 assertEquals(0.95, config.multipliers[7], 0.01)
+            }
+        }
+    }
+
+    // ── Reset to defaults ─────────────────────────────────────────────────────
+
+    @Test
+    fun resetButton_restoresSlidersToDefaultProgress() {
+        // Start with non-default saved values
+        val prefs = EqPreferences(ApplicationProvider.getApplicationContext())
+        prefs.saveBaseLevel(1400)
+        for (i in 0 until 8) prefs.saveBandProgress(i, 200)
+
+        ActivityScenario.launch(MainActivity::class.java).use { scenario ->
+            scenario.onActivity { activity ->
+                activity.btnReset.performClick()
+
+                assertEquals(EqPreferences.DEFAULT_BASE_LEVEL, activity.sliderBaseLevel.progress)
+                for (i in 0 until 8) {
+                    assertEquals(
+                        "Band $i should be reset to default ${EqPreferences.DEFAULT_BAND_PROGRESS[i]}",
+                        EqPreferences.DEFAULT_BAND_PROGRESS[i],
+                        activity.bandSliders[i]?.progress
+                    )
+                }
+            }
+        }
+    }
+
+    @Test
+    fun resetButton_updatesLabelsToDefaultValues() {
+        ActivityScenario.launch(MainActivity::class.java).use { scenario ->
+            scenario.onActivity { activity ->
+                // Move sliders away from defaults first
+                activity.sliderBaseLevel.progress = 1400
+                activity.bandSliders[0]?.progress = 200
+
+                activity.btnReset.performClick()
+
+                assertTrue(
+                    "Base level label should contain 700 after reset, got: ${activity.labelBaseLevel.text}",
+                    activity.labelBaseLevel.text.contains("700")
+                )
+                val band0Label = activity.bandLabels[0]?.text.toString()
+                assertTrue(
+                    "Band 0 label should contain 1.10 after reset, got: $band0Label",
+                    band0Label.contains("1.10")
+                )
+            }
+        }
+    }
+
+    @Test
+    fun resetButton_persistsDefaultValuesToPrefs() {
+        val prefs = EqPreferences(ApplicationProvider.getApplicationContext())
+        prefs.saveBaseLevel(1400)
+        for (i in 0 until 8) prefs.saveBandProgress(i, 200)
+
+        ActivityScenario.launch(MainActivity::class.java).use { scenario ->
+            scenario.onActivity { activity ->
+                activity.btnReset.performClick()
+            }
+        }
+
+        // Verify prefs were overwritten with defaults
+        val prefs2 = EqPreferences(ApplicationProvider.getApplicationContext())
+        assertEquals(EqPreferences.DEFAULT_BASE_LEVEL, prefs2.loadBaseLevel())
+        for (i in 0 until 8) {
+            assertEquals(
+                "Saved band $i should be default after reset",
+                EqPreferences.DEFAULT_BAND_PROGRESS[i],
+                prefs2.loadBandProgress(i)
+            )
+        }
+    }
+
+    @Test
+    fun resetButton_restoredDefaultsSurviveRelaunch() {
+        // Save non-default values, launch, reset, close, relaunch — check defaults are there
+        val prefs = EqPreferences(ApplicationProvider.getApplicationContext())
+        prefs.saveBaseLevel(1400)
+        for (i in 0 until 8) prefs.saveBandProgress(i, 200)
+
+        ActivityScenario.launch(MainActivity::class.java).use { scenario ->
+            scenario.onActivity { it.btnReset.performClick() }
+        }
+
+        ActivityScenario.launch(MainActivity::class.java).use { scenario ->
+            scenario.onActivity { activity ->
+                assertEquals(EqPreferences.DEFAULT_BASE_LEVEL, activity.sliderBaseLevel.progress)
+                assertTrue(
+                    "Label should show default 700 after relaunch, got: ${activity.labelBaseLevel.text}",
+                    activity.labelBaseLevel.text.contains("700")
+                )
+            }
+        }
+    }
+
+    @Test
+    fun resetButton_buildConfigMatchesDefaults() {
+        ActivityScenario.launch(MainActivity::class.java).use { scenario ->
+            scenario.onActivity { activity ->
+                // Move everything to max
+                activity.sliderBaseLevel.progress = 1500
+                for (i in 0 until 8) activity.bandSliders[i]?.progress = 200
+
+                activity.btnReset.performClick()
+
+                val config = activity.buildConfigFromSliders()
+                assertEquals(EqPreferences.DEFAULT_BASE_LEVEL, config.baseLevel)
+                assertEquals(1.10, config.multipliers[0], 0.01)
+                assertEquals(0.90, config.multipliers[1], 0.01)
+                assertEquals(0.70, config.multipliers[2], 0.01)
+                assertEquals(0.40, config.multipliers[3], 0.01)
+                assertEquals(0.40, config.multipliers[4], 0.01)
+                assertEquals(0.45, config.multipliers[5], 0.01)
+                assertEquals(0.70, config.multipliers[6], 0.01)
+                assertEquals(0.80, config.multipliers[7], 0.01)
             }
         }
     }
