@@ -1,51 +1,216 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<ScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
-    android:gravity="center"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:fillViewport="true">
 
     <LinearLayout
-        android:orientation="horizontal"
-        android:gravity="center"
-        android:layout_width="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center_horizontal"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="32dp">
+        android:padding="24dp">
 
-        <TextView
-            android:id="@+id/statusDot"
+        <!-- Status row -->
+        <LinearLayout
+            android:orientation="horizontal"
+            android:gravity="center"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="●"
-            android:textSize="24sp"
-            android:layout_marginEnd="8dp" />
+            android:layout_marginBottom="16dp">
 
-        <TextView
-            android:id="@+id/statusLabel"
+            <TextView
+                android:id="@+id/statusDot"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="●"
+                android:textSize="24sp"
+                android:layout_marginEnd="8dp" />
+
+            <TextView
+                android:id="@+id/statusLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Sound effect: OFF"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+        </LinearLayout>
+
+        <!-- ON / OFF buttons -->
+        <Button
+            android:id="@+id/btnStart"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Sound effect: OFF"
-            android:textSize="18sp"
-            android:textStyle="bold" />
+            android:text="ON"
+            android:layout_marginBottom="8dp"
+            android:backgroundTint="#4CAF50"
+            android:textColor="#FFFFFF"/>
+
+        <Button
+            android:id="@+id/btnStop"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="OFF"
+            android:backgroundTint="#F44336"
+            android:textColor="#FFFFFF"/>
+
+        <!-- ── Sliders panel ── -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="EQ Settings"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:layout_marginTop="24dp"
+            android:layout_marginBottom="8dp"/>
+
+        <!-- Base level -->
+        <TextView
+            android:id="@+id/labelBaseLevel"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Base Level: 700 mB"/>
+
+        <SeekBar
+            android:id="@+id/sliderBaseLevel"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:max="1500"
+            android:progress="700"
+            android:layout_marginBottom="12dp"/>
+
+        <!-- Band multipliers — one per frequency bucket -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Band Multipliers (×100)"
+            android:textStyle="italic"
+            android:textSize="13sp"
+            android:layout_marginBottom="4dp"/>
+
+        <!-- ≤ 60 Hz  default 1.10 → progress 110 / max 200 -->
+        <TextView
+            android:id="@+id/labelBand0"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="≤ 60 Hz (Sub-bass): 1.10×"/>
+        <SeekBar
+            android:id="@+id/sliderBand0"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:max="200"
+            android:progress="110"
+            android:layout_marginBottom="12dp"/>
+
+        <!-- ≤ 120 Hz  default 0.90 → progress 90 -->
+        <TextView
+            android:id="@+id/labelBand1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="≤ 120 Hz (Bass): 0.90×"/>
+        <SeekBar
+            android:id="@+id/sliderBand1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:max="200"
+            android:progress="90"
+            android:layout_marginBottom="12dp"/>
+
+        <!-- ≤ 250 Hz  default 0.70 → progress 70 -->
+        <TextView
+            android:id="@+id/labelBand2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="≤ 250 Hz (Low-mid): 0.70×"/>
+        <SeekBar
+            android:id="@+id/sliderBand2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:max="200"
+            android:progress="70"
+            android:layout_marginBottom="12dp"/>
+
+        <!-- ≤ 500 Hz  default 0.40 → progress 40 -->
+        <TextView
+            android:id="@+id/labelBand3"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="≤ 500 Hz (Mid): 0.40×"/>
+        <SeekBar
+            android:id="@+id/sliderBand3"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:max="200"
+            android:progress="40"
+            android:layout_marginBottom="12dp"/>
+
+        <!-- ≤ 2000 Hz  default 0.40 → progress 40 -->
+        <TextView
+            android:id="@+id/labelBand4"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="≤ 2000 Hz (Upper-mid): 0.40×"/>
+        <SeekBar
+            android:id="@+id/sliderBand4"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:max="200"
+            android:progress="40"
+            android:layout_marginBottom="12dp"/>
+
+        <!-- ≤ 4000 Hz  default 0.45 → progress 45 -->
+        <TextView
+            android:id="@+id/labelBand5"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="≤ 4000 Hz (Presence): 0.45×"/>
+        <SeekBar
+            android:id="@+id/sliderBand5"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:max="200"
+            android:progress="45"
+            android:layout_marginBottom="12dp"/>
+
+        <!-- ≤ 8000 Hz  default 0.70 → progress 70 -->
+        <TextView
+            android:id="@+id/labelBand6"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="≤ 8000 Hz (Brilliance): 0.70×"/>
+        <SeekBar
+            android:id="@+id/sliderBand6"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:max="200"
+            android:progress="70"
+            android:layout_marginBottom="12dp"/>
+
+        <!-- > 8000 Hz  default 0.80 → progress 80 -->
+        <TextView
+            android:id="@+id/labelBand7"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="> 8000 Hz (Air): 0.80×"/>
+        <SeekBar
+            android:id="@+id/sliderBand7"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:max="200"
+            android:progress="80"
+            android:layout_marginBottom="12dp"/>
+
+        <!-- Apply button -->
+        <Button
+            android:id="@+id/btnApply"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Apply EQ Settings"
+            android:layout_marginTop="8dp"
+            android:backgroundTint="#2196F3"
+            android:textColor="#FFFFFF"/>
 
     </LinearLayout>
-
-    <Button
-        android:id="@+id/btnStart"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="ON"
-        android:layout_marginBottom="8dp"
-        android:backgroundTint="#4CAF50"
-        android:textColor="#FFFFFF"/>
-
-    <Button
-        android:id="@+id/btnStop"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="OFF"
-        android:backgroundTint="#F44336"
-        android:textColor="#FFFFFF"/>
-
-</LinearLayout>
+</ScrollView>

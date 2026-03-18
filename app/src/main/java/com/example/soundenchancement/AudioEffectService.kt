@@ -10,29 +10,53 @@ import android.util.Log
 import androidx.core.app.NotificationCompat
 
 /**
+ * Holds the user-configurable EQ parameters.
+ * Default values match the original hard-coded constants.
+ *
+ * @param baseLevel        Overall boost strength in millibels (default 700).
+ * @param multipliers      Per-band multipliers indexed 0-7, corresponding to the
+ *                         frequency buckets ≤60, ≤120, ≤250, ≤500, ≤2000,
+ *                         ≤4000, ≤8000, and >8000 Hz respectively.
+ */
+data class EqConfig(
+    val baseLevel: Int = 700,
+    val multipliers: DoubleArray = doubleArrayOf(1.10, 0.90, 0.70, 0.40, 0.40, 0.45, 0.70, 0.80)
+) {
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is EqConfig) return false
+        return baseLevel == other.baseLevel && multipliers.contentEquals(other.multipliers)
+    }
+    override fun hashCode(): Int = 31 * baseLevel + multipliers.contentHashCode()
+}
+
+/**
  * Calculates the equalizer band level for a given frequency and base level.
  *
- * @param freqHz   Center frequency of the band in Hz (not milliHz).
+ * @param freqHz    Center frequency of the band in Hz (not milliHz).
  * @param baseLevel Desired base boost strength in millibels (e.g. 700).
  * @param minLevel  Minimum band level supported by the device equalizer (millibels).
  * @param maxLevel  Maximum band level supported by the device equalizer (millibels).
+ * @param config    EQ configuration carrying the per-band multipliers.
  * @return          Band level clamped to [minLevel, maxLevel].
  */
 fun calculateBandLevel(
     freqHz: Double,
     baseLevel: Int,
     minLevel: Int,
-    maxLevel: Int
+    maxLevel: Int,
+    config: EqConfig = EqConfig()
 ): Short {
+    val m = config.multipliers
     val boost = when {
-        freqHz <= 60   -> baseLevel * 1.10
-        freqHz <= 120  -> baseLevel * 0.90
-        freqHz <= 250  -> baseLevel * 0.70
-        freqHz <= 500  -> baseLevel * 0.40
-        freqHz <= 2000 -> baseLevel * 0.40
-        freqHz <= 4000 -> baseLevel * 0.45
-        freqHz <= 8000 -> baseLevel * 0.70
-        else           -> baseLevel * 0.80
+        freqHz <= 60   -> baseLevel * m[0]
+        freqHz <= 120  -> baseLevel * m[1]
+        freqHz <= 250  -> baseLevel * m[2]
+        freqHz <= 500  -> baseLevel * m[3]
+        freqHz <= 2000 -> baseLevel * m[4]
+        freqHz <= 4000 -> baseLevel * m[5]
+        freqHz <= 8000 -> baseLevel * m[6]
+        else           -> baseLevel * m[7]
     }
 
     val range = maxLevel - minLevel
@@ -58,7 +82,15 @@ class AudioEffectService : Service() {
         Log.d("AudioBoostService", "Dynamic Bass Enabled")
     }
 
-    private fun enableProfessionalDynamicBass(baseLevel: Int = 700) {
+    /**
+     * Re-applies the equalizer with the supplied [config].
+     * Called from [MainActivity] whenever the user taps "Apply EQ Settings".
+     */
+    fun applyConfig(config: EqConfig) {
+        enableProfessionalDynamicBass(config)
+    }
+
+    private fun enableProfessionalDynamicBass(config: EqConfig = EqConfig()) {
         try {
             equalizer?.release()
             equalizer = Equalizer(0, 0)
@@ -70,7 +102,13 @@ class AudioEffectService : Service() {
 
                 for (i in 0 until numberOfBands) {
                     val freqHz = eq.getCenterFreq(i.toShort()) / 1000.0
-                    val level = calculateBandLevel(freqHz, baseLevel, minLevel.toInt(), maxLevel.toInt())
+                    val level = calculateBandLevel(
+                        freqHz,
+                        config.baseLevel,
+                        minLevel.toInt(),
+                        maxLevel.toInt(),
+                        config
+                    )
                     eq.setBandLevel(i.toShort(), level)
                 }
             }
