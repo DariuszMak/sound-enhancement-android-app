@@ -13,10 +13,10 @@ import androidx.core.app.NotificationCompat
  * Holds the user-configurable EQ parameters.
  * Default values match the original hard-coded constants.
  *
- * @param baseLevel        Overall boost strength in millibels (default 700).
- * @param multipliers      Per-band multipliers indexed 0-7, corresponding to the
- *                         frequency buckets ≤60, ≤120, ≤250, ≤500, ≤2000,
- *                         ≤4000, ≤8000, and >8000 Hz respectively.
+ * @param baseLevel   Overall boost strength in millibels (default 700).
+ * @param multipliers Per-band multipliers indexed 0-7, corresponding to the
+ *                    frequency buckets ≤60, ≤120, ≤250, ≤500, ≤2000,
+ *                    ≤4000, ≤8000, and >8000 Hz respectively.
  */
 data class EqConfig(
     val baseLevel: Int = 700,
@@ -32,6 +32,7 @@ data class EqConfig(
 
 /**
  * Calculates the equalizer band level for a given frequency and base level.
+ * Logic is unchanged from the original implementation.
  *
  * @param freqHz    Center frequency of the band in Hz (not milliHz).
  * @param baseLevel Desired base boost strength in millibels (e.g. 700).
@@ -67,7 +68,13 @@ fun calculateBandLevel(
 class AudioEffectService : Service() {
 
     private val binder = LocalBinder()
-    private var equalizer: Equalizer? = null
+
+    // `internal` so instrumented tests can read it via the binder.
+    internal var equalizer: Equalizer? = null
+
+    /** Reflects whether the equalizer is currently processing audio. */
+    var isEqEnabled: Boolean = false
+        private set
 
     inner class LocalBinder : android.os.Binder() {
         fun getService(): AudioEffectService = this@AudioEffectService
@@ -78,23 +85,47 @@ class AudioEffectService : Service() {
     override fun onCreate() {
         super.onCreate()
         startForegroundService()
-        enableProfessionalDynamicBass()
+        applyConfig(EqConfig())                      // start with defaults
         Log.d("AudioBoostService", "Dynamic Bass Enabled")
     }
 
+    // ── Public API ────────────────────────────────────────────────────────────
+
     /**
-     * Re-applies the equalizer with the supplied [config].
-     * Called from [MainActivity] whenever the user taps "Apply EQ Settings".
+     * Applies [config] to the equalizer and ensures it is enabled.
+     * Safe to call at any time; always rebuilds band levels from scratch.
      */
     fun applyConfig(config: EqConfig) {
         enableProfessionalDynamicBass(config)
     }
 
-    private fun enableProfessionalDynamicBass(config: EqConfig = EqConfig()) {
+    /**
+     * Disables the equalizer effect without releasing it.
+     * Band levels are preserved so [enableEq] restores sound instantly.
+     */
+    fun disableEq() {
+        equalizer?.enabled = false
+        isEqEnabled = false
+        Log.d("AudioBoostService", "Equalizer disabled")
+    }
+
+    /**
+     * Re-enables the equalizer effect with the previously applied band levels.
+     */
+    fun enableEq() {
+        equalizer?.enabled = true
+        isEqEnabled = true
+        Log.d("AudioBoostService", "Equalizer re-enabled")
+    }
+
+    // ── Internal helpers ──────────────────────────────────────────────────────
+
+    private fun enableProfessionalDynamicBass(config: EqConfig) {
         try {
             equalizer?.release()
             equalizer = Equalizer(0, 0)
             equalizer?.enabled = true
+            isEqEnabled = true
 
             equalizer?.let { eq ->
                 val numberOfBands = eq.numberOfBands
@@ -113,9 +144,9 @@ class AudioEffectService : Service() {
                 }
             }
 
-            Log.d("AudioBoostService", "Professional dynamic bass + enhanced clarity applied")
+            Log.d("AudioBoostService", "EQ applied: baseLevel=${config.baseLevel}")
         } catch (e: Exception) {
-            Log.e("AudioBoostService", "Error applying professional dynamic bass + clarity", e)
+            Log.e("AudioBoostService", "Error applying EQ", e)
         }
     }
 
@@ -123,6 +154,7 @@ class AudioEffectService : Service() {
         try {
             equalizer?.release()
             equalizer = null
+            isEqEnabled = false
         } catch (e: Exception) {
             Log.e("AudioBoostService", "Error releasing Equalizer", e)
         }
