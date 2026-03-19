@@ -23,6 +23,7 @@ class MainActivityTest {
 
     @Before
     fun setUp() = clearPrefs()
+
     @After
     fun tearDown() = clearPrefs()
 
