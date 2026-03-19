@@ -18,7 +18,8 @@
             android:gravity="center"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp">
+            android:layout_marginBottom="16dp"
+            android:layout_marginTop="16dp">
 
             <TextView
                 android:id="@+id/statusDot"
@@ -112,8 +113,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Band Multipliers"
-                android:textStyle="italic"
-                android:textSize="13sp"
+                android:textStyle="bold"
+                android:textSize="14sp"
                 android:layout_marginBottom="4dp"/>
 
             <TextView
