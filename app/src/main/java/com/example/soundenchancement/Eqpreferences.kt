@@ -9,7 +9,6 @@ class EqPreferences(context: Context) {
     private val prefs: SharedPreferences =
         context.getSharedPreferences(PREF_FILE, Context.MODE_PRIVATE)
 
-    
 
     fun saveBaseLevel(progress: Int) =
         prefs.edit().putInt(KEY_BASE_LEVEL, progress).apply()
@@ -20,7 +19,6 @@ class EqPreferences(context: Context) {
     fun saveIsActive(active: Boolean) =
         prefs.edit().putBoolean(KEY_IS_ACTIVE, active).apply()
 
-    
 
     fun loadBaseLevel(): Int =
         prefs.getInt(KEY_BASE_LEVEL, DEFAULT_BASE_LEVEL)
@@ -29,17 +27,16 @@ class EqPreferences(context: Context) {
         prefs.getInt(bandKey(band), DEFAULT_BAND_PROGRESS[band])
 
     fun loadIsActive(): Boolean =
-        prefs.getBoolean(KEY_IS_ACTIVE, true)   
+        prefs.getBoolean(KEY_IS_ACTIVE, true)
 
-    
 
     private fun bandKey(band: Int) = "${KEY_BAND_PREFIX}$band"
 
     companion object {
-        private const val PREF_FILE       = "eq_settings"
-        private const val KEY_BASE_LEVEL  = "base_level"
+        private const val PREF_FILE = "eq_settings"
+        private const val KEY_BASE_LEVEL = "base_level"
         private const val KEY_BAND_PREFIX = "band_"
-        private const val KEY_IS_ACTIVE   = "is_active"
+        private const val KEY_IS_ACTIVE = "is_active"
 
         const val DEFAULT_BASE_LEVEL = 700
 

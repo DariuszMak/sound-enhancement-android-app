@@ -2,12 +2,16 @@ package com.example.soundenchancement
 
 import android.content.Context
 import android.content.Intent
-import android.media.audiofx.Equalizer
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.rule.ServiceTestRule
-import org.junit.*
-import org.junit.Assert.*
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNotEquals
+import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertTrue
+import org.junit.Rule
+import org.junit.Test
 import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
@@ -18,11 +22,10 @@ class AudioEffectServiceTest {
 
     private fun bindService(): AudioEffectService {
         val context = ApplicationProvider.getApplicationContext<Context>()
-        val binder  = serviceRule.bindService(Intent(context, AudioEffectService::class.java))
+        val binder = serviceRule.bindService(Intent(context, AudioEffectService::class.java))
         return (binder as AudioEffectService.LocalBinder).getService()
     }
 
-    
 
     @Test
     fun serviceStartsAndAppliesEqualizer() {
@@ -33,7 +36,7 @@ class AudioEffectServiceTest {
         assertNotNull(eq)
         assertTrue("Equalizer should be enabled on start", eq!!.enabled)
 
-        val numberOfBands       = eq.numberOfBands
+        val numberOfBands = eq.numberOfBands
         val (minLevel, maxLevel) = eq.bandLevelRange
         for (i in 0 until numberOfBands) {
             val bandLevel = eq.getBandLevel(i.toShort())
@@ -44,11 +47,10 @@ class AudioEffectServiceTest {
         }
 
         val firstBand = eq.getBandLevel(0)
-        val midBand   = eq.getBandLevel((numberOfBands / 2).toShort())
+        val midBand = eq.getBandLevel((numberOfBands / 2).toShort())
         assertTrue("Bass band should be stronger than mid band", firstBand > midBand)
     }
 
-    
 
     @Test
     fun disableEq_turnsOffEqualizerEffect() {
@@ -64,13 +66,12 @@ class AudioEffectServiceTest {
         )
     }
 
-    
 
     @Test
     fun enableEq_restoresEqualizerAfterDisable() {
         val service = bindService()
 
-        
+
         val eq = service.equalizer!!
         val levelsBefore = (0 until eq.numberOfBands).map { eq.getBandLevel(it.toShort()) }
 
@@ -85,23 +86,22 @@ class AudioEffectServiceTest {
             service.equalizer?.enabled ?: false
         )
 
-        
+
         val levelsAfter = (0 until eq.numberOfBands).map { eq.getBandLevel(it.toShort()) }
         assertEquals("Band levels should not change on re-enable", levelsBefore, levelsAfter)
     }
 
-    
 
     @Test
     fun applyConfig_updatesBandLevels() {
         val service = bindService()
-        val eq      = service.equalizer!!
+        val eq = service.equalizer!!
 
         val before = (0 until eq.numberOfBands).map { eq.getBandLevel(it.toShort()) }
 
-        
+
         val newConfig = EqConfig(
-            baseLevel   = 1400,
+            baseLevel = 1400,
             multipliers = DoubleArray(8) { 2.0 }
         )
         service.applyConfig(newConfig)
@@ -115,7 +115,6 @@ class AudioEffectServiceTest {
         )
     }
 
-    
 
     @Test
     fun applyConfig_whileDisabled_doesNotEnableEq() {
@@ -123,20 +122,19 @@ class AudioEffectServiceTest {
         service.disableEq()
         assertFalse(service.isEqEnabled)
 
-        
-        
-        
-        
+
+
+
+
         service.applyConfig(EqConfig())
-        
-        
+
+
         assertTrue(
             "applyConfig always re-enables the equalizer; Activity must guard calls",
             service.isEqEnabled
         )
     }
 
-    
 
     @Test
     fun isEqEnabled_tracksMultipleToggleCycles() {

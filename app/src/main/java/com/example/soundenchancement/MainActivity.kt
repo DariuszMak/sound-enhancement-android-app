@@ -14,13 +14,13 @@ import androidx.core.content.ContextCompat
 
 class MainActivity : AppCompatActivity() {
 
-    
+
     internal var isBassActive = false
 
-    
+
     internal lateinit var eqPrefs: EqPreferences
 
-    
+
     internal var audioService: AudioEffectService? = null
     private var serviceBound = false
 
@@ -29,13 +29,14 @@ class MainActivity : AppCompatActivity() {
             audioService = (binder as AudioEffectService.LocalBinder).getService()
             serviceBound = true
         }
+
         override fun onServiceDisconnected(name: ComponentName?) {
             audioService = null
             serviceBound = false
         }
     }
 
-    
+
     internal lateinit var statusDot: TextView
     internal lateinit var statusLabel: TextView
     internal lateinit var btnStart: Button
@@ -47,9 +48,9 @@ class MainActivity : AppCompatActivity() {
     internal lateinit var labelBaseLevel: TextView
 
     internal val bandSliders = arrayOfNulls<SeekBar>(8)
-    internal val bandLabels  = arrayOfNulls<TextView>(8)
+    internal val bandLabels = arrayOfNulls<TextView>(8)
 
-    
+
     private val bandNames = arrayOf(
         "≤ 60 Hz (Sub-bass)",
         "≤ 120 Hz (Bass)",
@@ -61,7 +62,6 @@ class MainActivity : AppCompatActivity() {
         "> 8000 Hz (Air)"
     )
 
-    
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -70,16 +70,16 @@ class MainActivity : AppCompatActivity() {
         eqPrefs = EqPreferences(this)
 
         bindWidgets()
-        setupSliderListeners()        
-        restoreSliderState()          
-                                      
+        setupSliderListeners()
+        restoreSliderState()
+
 
         isBassActive = eqPrefs.loadIsActive()
         if (isBassActive) startService(Intent(this, AudioEffectService::class.java))
         refreshUi()
 
         btnStart.setOnClickListener { onStartClicked() }
-        btnStop.setOnClickListener  { onStopClicked()  }
+        btnStop.setOnClickListener { onStopClicked() }
         btnReset.setOnClickListener { onResetClicked() }
     }
 
@@ -88,7 +88,7 @@ class MainActivity : AppCompatActivity() {
         bindService(
             Intent(this, AudioEffectService::class.java),
             serviceConnection,
-            0   
+            0
         )
     }
 
@@ -101,7 +101,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    
 
     internal fun onStartClicked() {
         if (!isBassActive) {
@@ -133,27 +132,28 @@ class MainActivity : AppCompatActivity() {
         for (i in 0 until 8) {
             bandSliders[i]?.progress = EqPreferences.DEFAULT_BAND_PROGRESS[i]
         }
-        
-        
+
+
         eqPrefs.saveBaseLevel(EqPreferences.DEFAULT_BASE_LEVEL)
         for (i in 0 until 8) {
             eqPrefs.saveBandProgress(i, EqPreferences.DEFAULT_BAND_PROGRESS[i])
         }
-        
+
         if (isBassActive) audioService?.applyConfig(buildConfigFromSliders())
     }
 
-    
 
     internal fun refreshUi() {
         if (isBassActive) {
             statusDot.setTextColor(
-                ContextCompat.getColor(this, android.R.color.holo_green_light))
+                ContextCompat.getColor(this, android.R.color.holo_green_light)
+            )
             statusLabel.text = "Sound effect: ON"
             setEqPanelEnabled(true)
         } else {
             statusDot.setTextColor(
-                ContextCompat.getColor(this, android.R.color.holo_red_light))
+                ContextCompat.getColor(this, android.R.color.holo_red_light)
+            )
             statusLabel.text = "Sound effect: OFF"
             setEqPanelEnabled(false)
         }
@@ -171,18 +171,17 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    
 
     private fun bindWidgets() {
-        statusDot   = findViewById(R.id.statusDot)
+        statusDot = findViewById(R.id.statusDot)
         statusLabel = findViewById(R.id.statusLabel)
-        btnStart    = findViewById(R.id.btnStart)
-        btnStop     = findViewById(R.id.btnStop)
-        btnReset    = findViewById(R.id.btnReset)
-        eqPanel     = findViewById(R.id.eqPanel)
+        btnStart = findViewById(R.id.btnStart)
+        btnStop = findViewById(R.id.btnStop)
+        btnReset = findViewById(R.id.btnReset)
+        eqPanel = findViewById(R.id.eqPanel)
 
         sliderBaseLevel = findViewById(R.id.sliderBaseLevel)
-        labelBaseLevel  = findViewById(R.id.labelBaseLevel)
+        labelBaseLevel = findViewById(R.id.labelBaseLevel)
 
         val sliderIds = intArrayOf(
             R.id.sliderBand0, R.id.sliderBand1, R.id.sliderBand2, R.id.sliderBand3,
@@ -194,7 +193,7 @@ class MainActivity : AppCompatActivity() {
         )
         for (i in 0 until 8) {
             bandSliders[i] = findViewById(sliderIds[i])
-            bandLabels[i]  = findViewById(labelIds[i])
+            bandLabels[i] = findViewById(labelIds[i])
         }
     }
 
@@ -203,6 +202,7 @@ class MainActivity : AppCompatActivity() {
             override fun onProgressChanged(sb: SeekBar?, progress: Int, fromUser: Boolean) {
                 labelBaseLevel.text = "Base Level: $progress mB"
             }
+
             override fun onStartTrackingTouch(sb: SeekBar?) {}
             override fun onStopTrackingTouch(sb: SeekBar?) {
                 eqPrefs.saveBaseLevel(sliderBaseLevel.progress)
@@ -217,6 +217,7 @@ class MainActivity : AppCompatActivity() {
                     bandLabels[index]?.text =
                         "${bandNames[index]}: ${"%.2f".format(progress / 100.0)}×"
                 }
+
                 override fun onStartTrackingTouch(sb: SeekBar?) {}
                 override fun onStopTrackingTouch(sb: SeekBar?) {
                     eqPrefs.saveBandProgress(index, bandSliders[index]?.progress ?: 0)
@@ -234,7 +235,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    
 
     internal fun buildConfigFromSliders(): EqConfig {
         val baseLevel = sliderBaseLevel.progress

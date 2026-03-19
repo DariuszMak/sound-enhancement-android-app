@@ -1,12 +1,13 @@
 package com.example.soundenchancement
 
 import android.content.Context
-import android.widget.TextView
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.junit.After
-import org.junit.Assert.*
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -20,10 +21,11 @@ class MainActivityTest {
             .edit().clear().commit()
     }
 
-    @Before fun setUp()    = clearPrefs()
-    @After  fun tearDown() = clearPrefs()
+    @Before
+    fun setUp() = clearPrefs()
+    @After
+    fun tearDown() = clearPrefs()
 
-    
 
     @Test
     fun onLaunch_statusShouldShowOn() {
@@ -44,7 +46,6 @@ class MainActivityTest {
         }
     }
 
-    
 
     @Test
     fun onLaunch_eqPanelIsEnabled() {
@@ -95,7 +96,6 @@ class MainActivityTest {
         }
     }
 
-    
 
     @Test
     fun buildConfigFromSliders_returnsDefaultConfig_onFreshLaunch() {
@@ -128,7 +128,6 @@ class MainActivityTest {
         }
     }
 
-    
 
     @Test
     fun baseLevelSlider_updatesLabelOnChange() {
@@ -151,7 +150,6 @@ class MainActivityTest {
         }
     }
 
-    
 
     @Test
     fun isBassActive_isTrueOnFreshLaunch() {
@@ -184,7 +182,6 @@ class MainActivityTest {
         }
     }
 
-    
 
     @Test
     fun sliderValues_areRestoredAfterRelaunch() {
@@ -196,8 +193,8 @@ class MainActivityTest {
         ActivityScenario.launch(MainActivity::class.java).use { scenario ->
             scenario.onActivity { activity ->
                 assertEquals(1100, activity.sliderBaseLevel.progress)
-                assertEquals(180,  activity.bandSliders[0]?.progress)
-                assertEquals(60,   activity.bandSliders[3]?.progress)
+                assertEquals(180, activity.bandSliders[0]?.progress)
+                assertEquals(60, activity.bandSliders[3]?.progress)
             }
         }
     }
@@ -207,7 +204,7 @@ class MainActivityTest {
     fun sliderLabels_reflectRestoredValues_onRelaunch() {
         val prefs = EqPreferences(ApplicationProvider.getApplicationContext())
         prefs.saveBaseLevel(900)
-        prefs.saveBandProgress(1, 160)   
+        prefs.saveBandProgress(1, 160)
 
         ActivityScenario.launch(MainActivity::class.java).use { scenario ->
             scenario.onActivity { activity ->
@@ -280,18 +277,17 @@ class MainActivityTest {
         ActivityScenario.launch(MainActivity::class.java).use { scenario ->
             scenario.onActivity { activity ->
                 val config = activity.buildConfigFromSliders()
-                assertEquals(500,  config.baseLevel)
+                assertEquals(500, config.baseLevel)
                 assertEquals(1.20, config.multipliers[0], 0.01)
                 assertEquals(0.95, config.multipliers[7], 0.01)
             }
         }
     }
 
-    
 
     @Test
     fun resetButton_restoresSlidersToDefaultProgress() {
-        
+
         val prefs = EqPreferences(ApplicationProvider.getApplicationContext())
         prefs.saveBaseLevel(1400)
         for (i in 0 until 8) prefs.saveBandProgress(i, 200)
@@ -316,7 +312,7 @@ class MainActivityTest {
     fun resetButton_updatesLabelsToDefaultValues() {
         ActivityScenario.launch(MainActivity::class.java).use { scenario ->
             scenario.onActivity { activity ->
-                
+
                 activity.sliderBaseLevel.progress = 1400
                 activity.bandSliders[0]?.progress = 200
 
@@ -347,7 +343,7 @@ class MainActivityTest {
             }
         }
 
-        
+
         val prefs2 = EqPreferences(ApplicationProvider.getApplicationContext())
         assertEquals(EqPreferences.DEFAULT_BASE_LEVEL, prefs2.loadBaseLevel())
         for (i in 0 until 8) {
@@ -361,7 +357,7 @@ class MainActivityTest {
 
     @Test
     fun resetButton_restoredDefaultsSurviveRelaunch() {
-        
+
         val prefs = EqPreferences(ApplicationProvider.getApplicationContext())
         prefs.saveBaseLevel(1400)
         for (i in 0 until 8) prefs.saveBandProgress(i, 200)
@@ -385,7 +381,7 @@ class MainActivityTest {
     fun resetButton_buildConfigMatchesDefaults() {
         ActivityScenario.launch(MainActivity::class.java).use { scenario ->
             scenario.onActivity { activity ->
-                
+
                 activity.sliderBaseLevel.progress = 1500
                 for (i in 0 until 8) activity.bandSliders[i]?.progress = 200
 

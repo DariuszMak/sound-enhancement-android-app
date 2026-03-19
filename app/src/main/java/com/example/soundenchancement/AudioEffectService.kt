@@ -1,6 +1,9 @@
 package com.example.soundenchancement
 
-import android.app.*
+import android.app.Notification
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.Service
 import android.content.Intent
 import android.content.pm.ServiceInfo
 import android.media.audiofx.Equalizer
@@ -19,6 +22,7 @@ data class EqConfig(
         if (other !is EqConfig) return false
         return baseLevel == other.baseLevel && multipliers.contentEquals(other.multipliers)
     }
+
     override fun hashCode(): Int = 31 * baseLevel + multipliers.contentHashCode()
 }
 
@@ -32,14 +36,14 @@ fun calculateBandLevel(
 ): Short {
     val m = config.multipliers
     val boost = when {
-        freqHz <= 60   -> baseLevel * m[0]
-        freqHz <= 120  -> baseLevel * m[1]
-        freqHz <= 250  -> baseLevel * m[2]
-        freqHz <= 500  -> baseLevel * m[3]
+        freqHz <= 60 -> baseLevel * m[0]
+        freqHz <= 120 -> baseLevel * m[1]
+        freqHz <= 250 -> baseLevel * m[2]
+        freqHz <= 500 -> baseLevel * m[3]
         freqHz <= 2000 -> baseLevel * m[4]
         freqHz <= 4000 -> baseLevel * m[5]
         freqHz <= 8000 -> baseLevel * m[6]
-        else           -> baseLevel * m[7]
+        else -> baseLevel * m[7]
     }
 
     val range = maxLevel - minLevel
@@ -51,7 +55,7 @@ class AudioEffectService : Service() {
 
     private val binder = LocalBinder()
 
-    
+
     internal var equalizer: Equalizer? = null
 
     var isEqEnabled: Boolean = false
@@ -66,11 +70,9 @@ class AudioEffectService : Service() {
     override fun onCreate() {
         super.onCreate()
         startForegroundService()
-        applyConfig(EqConfig())                      
+        applyConfig(EqConfig())
         Log.d("AudioBoostService", "Dynamic Bass Enabled")
     }
-
-    
 
 
     fun applyConfig(config: EqConfig) {
@@ -91,7 +93,6 @@ class AudioEffectService : Service() {
         Log.d("AudioBoostService", "Equalizer re-enabled")
     }
 
-    
 
     private fun enableProfessionalDynamicBass(config: EqConfig) {
         try {

@@ -1,33 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fillViewport="true">
 
     <LinearLayout
-        android:orientation="vertical"
-        android:gravity="center_horizontal"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:gravity="center_horizontal"
+        android:orientation="vertical"
         android:padding="24dp">
 
-        
+
         <LinearLayout
-            android:orientation="horizontal"
-            android:gravity="center"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
             android:layout_marginBottom="16dp"
-            android:layout_marginTop="16dp">
+            android:gravity="center"
+            android:orientation="horizontal">
 
             <TextView
                 android:id="@+id/statusDot"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
                 android:text="●"
-                android:textSize="24sp"
-                android:layout_marginEnd="8dp" />
+                android:textSize="24sp" />
 
             <TextView
                 android:id="@+id/statusLabel"
@@ -39,39 +38,39 @@
 
         </LinearLayout>
 
-        
+
         <Button
             android:id="@+id/btnStart"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="ON"
             android:layout_marginBottom="8dp"
             android:backgroundTint="#4CAF50"
-            android:textColor="#FFFFFF"/>
+            android:text="ON"
+            android:textColor="#FFFFFF" />
 
         <Button
             android:id="@+id/btnStop"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="OFF"
             android:backgroundTint="#F44336"
-            android:textColor="#FFFFFF"/>
+            android:text="OFF"
+            android:textColor="#FFFFFF" />
 
-        
+
         <LinearLayout
             android:id="@+id/eqPanel"
-            android:orientation="vertical"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="24dp">
+            android:layout_marginTop="24dp"
+            android:orientation="vertical">
 
-            
+
             <LinearLayout
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="8dp">
+                android:layout_marginBottom="8dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
 
                 <TextView
                     android:layout_width="0dp"
@@ -79,147 +78,155 @@
                     android:layout_weight="1"
                     android:text="EQ Settings"
                     android:textSize="18sp"
-                    android:textStyle="bold"/>
+                    android:textStyle="bold" />
 
                 <Button
                     android:id="@+id/btnReset"
+                    style="@style/Widget.MaterialComponents.Button.TextButton"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Reset to defaults"
                     android:backgroundTint="#9E9E9E"
+                    android:text="Reset to defaults"
                     android:textColor="#FFFFFF"
-                    android:textSize="12sp"
-                    style="@style/Widget.MaterialComponents.Button.TextButton"/>
+                    android:textSize="12sp" />
 
             </LinearLayout>
 
-            
+
             <TextView
                 android:id="@+id/labelBaseLevel"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Base Level"/>
+                android:text="Base Level" />
 
             <SeekBar
                 android:id="@+id/sliderBaseLevel"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginBottom="12dp"
                 android:max="1500"
-                android:progress="0"
-                android:layout_marginBottom="12dp"/>
+                android:progress="0" />
 
-            
+
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginBottom="10dp"
                 android:text="Band Multipliers:"
-                android:textStyle="bold|italic"
                 android:textSize="16sp"
-                android:layout_marginBottom="10dp"/>
+                android:textStyle="bold|italic" />
 
             <TextView
                 android:id="@+id/labelBand0"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="≤ 60 Hz (Sub-bass)"/>
+                android:text="≤ 60 Hz (Sub-bass)" />
+
             <SeekBar
                 android:id="@+id/sliderBand0"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginBottom="12dp"
                 android:max="200"
-                android:progress="0"
-                android:layout_marginBottom="12dp"/>
+                android:progress="0" />
 
             <TextView
                 android:id="@+id/labelBand1"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="≤ 120 Hz (Bass)"/>
+                android:text="≤ 120 Hz (Bass)" />
+
             <SeekBar
                 android:id="@+id/sliderBand1"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginBottom="12dp"
                 android:max="200"
-                android:progress="0"
-                android:layout_marginBottom="12dp"/>
+                android:progress="0" />
 
             <TextView
                 android:id="@+id/labelBand2"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="≤ 250 Hz (Low-mid)"/>
+                android:text="≤ 250 Hz (Low-mid)" />
+
             <SeekBar
                 android:id="@+id/sliderBand2"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginBottom="12dp"
                 android:max="200"
-                android:progress="0"
-                android:layout_marginBottom="12dp"/>
+                android:progress="0" />
 
             <TextView
                 android:id="@+id/labelBand3"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="≤ 500 Hz (Mid)"/>
+                android:text="≤ 500 Hz (Mid)" />
+
             <SeekBar
                 android:id="@+id/sliderBand3"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginBottom="12dp"
                 android:max="200"
-                android:progress="0"
-                android:layout_marginBottom="12dp"/>
+                android:progress="0" />
 
             <TextView
                 android:id="@+id/labelBand4"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="≤ 2000 Hz (Upper-mid)"/>
+                android:text="≤ 2000 Hz (Upper-mid)" />
+
             <SeekBar
                 android:id="@+id/sliderBand4"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginBottom="12dp"
                 android:max="200"
-                android:progress="0"
-                android:layout_marginBottom="12dp"/>
+                android:progress="0" />
 
             <TextView
                 android:id="@+id/labelBand5"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="≤ 4000 Hz (Presence)"/>
+                android:text="≤ 4000 Hz (Presence)" />
+
             <SeekBar
                 android:id="@+id/sliderBand5"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginBottom="12dp"
                 android:max="200"
-                android:progress="0"
-                android:layout_marginBottom="12dp"/>
+                android:progress="0" />
 
             <TextView
                 android:id="@+id/labelBand6"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="≤ 8000 Hz (Brilliance)"/>
+                android:text="≤ 8000 Hz (Brilliance)" />
+
             <SeekBar
                 android:id="@+id/sliderBand6"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginBottom="12dp"
                 android:max="200"
-                android:progress="0"
-                android:layout_marginBottom="12dp"/>
+                android:progress="0" />
 
             <TextView
                 android:id="@+id/labelBand7"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="> 8000 Hz (Air)"/>
+                android:text="> 8000 Hz (Air)" />
+
             <SeekBar
                 android:id="@+id/sliderBand7"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginBottom="12dp"
                 android:max="200"
-                android:progress="0"
-                android:layout_marginBottom="12dp"/>
+                android:progress="0" />
 
         </LinearLayout>
 
