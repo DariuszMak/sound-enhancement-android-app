@@ -23,7 +23,7 @@ class MainActivityTest {
     @Before fun setUp()    = clearPrefs()
     @After  fun tearDown() = clearPrefs()
 
-    // ── Original launch tests ─────────────────────────────────────────────────
+    
 
     @Test
     fun onLaunch_statusShouldShowOn() {
@@ -44,7 +44,7 @@ class MainActivityTest {
         }
     }
 
-    // ── EQ panel state ────────────────────────────────────────────────────────
+    
 
     @Test
     fun onLaunch_eqPanelIsEnabled() {
@@ -95,7 +95,7 @@ class MainActivityTest {
         }
     }
 
-    // ── buildConfigFromSliders ────────────────────────────────────────────────
+    
 
     @Test
     fun buildConfigFromSliders_returnsDefaultConfig_onFreshLaunch() {
@@ -128,7 +128,7 @@ class MainActivityTest {
         }
     }
 
-    // ── Label updates ─────────────────────────────────────────────────────────
+    
 
     @Test
     fun baseLevelSlider_updatesLabelOnChange() {
@@ -151,7 +151,7 @@ class MainActivityTest {
         }
     }
 
-    // ── isBassActive tracking ─────────────────────────────────────────────────
+    
 
     @Test
     fun isBassActive_isTrueOnFreshLaunch() {
@@ -184,7 +184,7 @@ class MainActivityTest {
         }
     }
 
-    // ── Persistence: slider values survive across Activity instances ──────────
+    
 
     @Test
     fun sliderValues_areRestoredAfterRelaunch() {
@@ -211,7 +211,7 @@ class MainActivityTest {
     fun sliderLabels_reflectRestoredValues_onRelaunch() {
         val prefs = EqPreferences(ApplicationProvider.getApplicationContext())
         prefs.saveBaseLevel(900)
-        prefs.saveBandProgress(1, 160)   // → 1.60×
+        prefs.saveBandProgress(1, 160)   
 
         ActivityScenario.launch(MainActivity::class.java).use { scenario ->
             scenario.onActivity { activity ->
@@ -291,11 +291,11 @@ class MainActivityTest {
         }
     }
 
-    // ── Reset to defaults ─────────────────────────────────────────────────────
+    
 
     @Test
     fun resetButton_restoresSlidersToDefaultProgress() {
-        // Start with non-default saved values
+        
         val prefs = EqPreferences(ApplicationProvider.getApplicationContext())
         prefs.saveBaseLevel(1400)
         for (i in 0 until 8) prefs.saveBandProgress(i, 200)
@@ -320,7 +320,7 @@ class MainActivityTest {
     fun resetButton_updatesLabelsToDefaultValues() {
         ActivityScenario.launch(MainActivity::class.java).use { scenario ->
             scenario.onActivity { activity ->
-                // Move sliders away from defaults first
+                
                 activity.sliderBaseLevel.progress = 1400
                 activity.bandSliders[0]?.progress = 200
 
@@ -351,7 +351,7 @@ class MainActivityTest {
             }
         }
 
-        // Verify prefs were overwritten with defaults
+        
         val prefs2 = EqPreferences(ApplicationProvider.getApplicationContext())
         assertEquals(EqPreferences.DEFAULT_BASE_LEVEL, prefs2.loadBaseLevel())
         for (i in 0 until 8) {
@@ -365,7 +365,7 @@ class MainActivityTest {
 
     @Test
     fun resetButton_restoredDefaultsSurviveRelaunch() {
-        // Save non-default values, launch, reset, close, relaunch — check defaults are there
+        
         val prefs = EqPreferences(ApplicationProvider.getApplicationContext())
         prefs.saveBaseLevel(1400)
         for (i in 0 until 8) prefs.saveBandProgress(i, 200)
@@ -389,7 +389,7 @@ class MainActivityTest {
     fun resetButton_buildConfigMatchesDefaults() {
         ActivityScenario.launch(MainActivity::class.java).use { scenario ->
             scenario.onActivity { activity ->
-                // Move everything to max
+                
                 activity.sliderBaseLevel.progress = 1500
                 for (i in 0 until 8) activity.bandSliders[i]?.progress = 200
 

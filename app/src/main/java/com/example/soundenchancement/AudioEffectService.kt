@@ -69,7 +69,7 @@ class AudioEffectService : Service() {
 
     private val binder = LocalBinder()
 
-    // `internal` so instrumented tests can read it via the binder.
+    
     internal var equalizer: Equalizer? = null
 
     /** Reflects whether the equalizer is currently processing audio. */
@@ -85,11 +85,11 @@ class AudioEffectService : Service() {
     override fun onCreate() {
         super.onCreate()
         startForegroundService()
-        applyConfig(EqConfig())                      // start with defaults
+        applyConfig(EqConfig())                      
         Log.d("AudioBoostService", "Dynamic Bass Enabled")
     }
 
-    // ── Public API ────────────────────────────────────────────────────────────
+    
 
     /**
      * Applies [config] to the equalizer and ensures it is enabled.
@@ -118,7 +118,7 @@ class AudioEffectService : Service() {
         Log.d("AudioBoostService", "Equalizer re-enabled")
     }
 
-    // ── Internal helpers ──────────────────────────────────────────────────────
+    
 
     private fun enableProfessionalDynamicBass(config: EqConfig) {
         try {

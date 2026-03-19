@@ -9,7 +9,7 @@ import org.junit.Test
  */
 class BandLevelCalculatorTest {
 
-    // Use a realistic equalizer range: -1500 to +1500 millibels
+    
     private val minLevel = -1500
     private val maxLevel = 1500
     private val baseLevel = 700
@@ -54,7 +54,7 @@ class BandLevelCalculatorTest {
 
     @Test
     fun exactBoundary_60Hz_usesSubBassMultiplier() {
-        // 60 Hz hits the first branch (freq <= 60), multiplier = 1.1
+        
         val at60  = calculateBandLevel(60.0, baseLevel, minLevel, maxLevel)
         val at61  = calculateBandLevel(61.0, baseLevel, minLevel, maxLevel)
         assertTrue(
@@ -65,14 +65,14 @@ class BandLevelCalculatorTest {
 
     @Test
     fun zeroBaseLevel_returnsMinLevel() {
-        // With baseLevel = 0, boost = 0 for every band → scaled result should be minLevel
+        
         val level = calculateBandLevel(1000.0, 0, minLevel, maxLevel)
         assertEquals("Zero baseLevel should yield minLevel", minLevel.toShort(), level)
     }
 
     @Test
     fun symmetricRange_minEqualsNegativeMax() {
-        // Sanity check: minLevel == -maxLevel (common on real devices)
+        
         val level = calculateBandLevel(60.0, baseLevel, -1500, 1500)
         assertTrue(level in -1500..1500)
     }

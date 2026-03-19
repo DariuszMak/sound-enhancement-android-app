@@ -14,13 +14,13 @@ import androidx.core.content.ContextCompat
 
 class MainActivity : AppCompatActivity() {
 
-    // ── State ─────────────────────────────────────────────────────────────────
+    
     internal var isBassActive = false
 
-    // ── Persistence ───────────────────────────────────────────────────────────
+    
     internal lateinit var eqPrefs: EqPreferences
 
-    // ── Service binding ───────────────────────────────────────────────────────
+    
     internal var audioService: AudioEffectService? = null
     private var serviceBound = false
 
@@ -35,7 +35,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    // ── Widget references (internal for test access) ──────────────────────────
+    
     internal lateinit var statusDot: TextView
     internal lateinit var statusLabel: TextView
     internal lateinit var btnStart: Button
@@ -49,7 +49,7 @@ class MainActivity : AppCompatActivity() {
     internal val bandSliders = arrayOfNulls<SeekBar>(8)
     internal val bandLabels  = arrayOfNulls<TextView>(8)
 
-    // ── Constants ─────────────────────────────────────────────────────────────
+    
     private val bandNames = arrayOf(
         "≤ 60 Hz (Sub-bass)",
         "≤ 120 Hz (Bass)",
@@ -61,7 +61,7 @@ class MainActivity : AppCompatActivity() {
         "> 8000 Hz (Air)"
     )
 
-    // ── Lifecycle ─────────────────────────────────────────────────────────────
+    
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -70,9 +70,9 @@ class MainActivity : AppCompatActivity() {
         eqPrefs = EqPreferences(this)
 
         bindWidgets()
-        setupSliderListeners()        // attach listeners FIRST …
-        restoreSliderState()          // … then set progress so onProgressChanged
-                                      //   fires and labels update immediately
+        setupSliderListeners()        
+        restoreSliderState()          
+                                      
 
         isBassActive = eqPrefs.loadIsActive()
         if (isBassActive) startService(Intent(this, AudioEffectService::class.java))
@@ -88,7 +88,7 @@ class MainActivity : AppCompatActivity() {
         bindService(
             Intent(this, AudioEffectService::class.java),
             serviceConnection,
-            0   // no BIND_AUTO_CREATE — only attach to an already-running service
+            0   
         )
     }
 
@@ -101,7 +101,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    // ── Button handlers ───────────────────────────────────────────────────────
+    
 
     internal fun onStartClicked() {
         if (!isBassActive) {
@@ -136,17 +136,17 @@ class MainActivity : AppCompatActivity() {
         for (i in 0 until 8) {
             bandSliders[i]?.progress = EqPreferences.DEFAULT_BAND_PROGRESS[i]
         }
-        // Labels were already updated by the onProgressChanged listeners above.
-        // Persist the reset values.
+        
+        
         eqPrefs.saveBaseLevel(EqPreferences.DEFAULT_BASE_LEVEL)
         for (i in 0 until 8) {
             eqPrefs.saveBandProgress(i, EqPreferences.DEFAULT_BAND_PROGRESS[i])
         }
-        // Apply immediately if active.
+        
         if (isBassActive) audioService?.applyConfig(buildConfigFromSliders())
     }
 
-    // ── UI helpers ────────────────────────────────────────────────────────────
+    
 
     internal fun refreshUi() {
         if (isBassActive) {
@@ -174,7 +174,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    // ── Slider wiring ─────────────────────────────────────────────────────────
+    
 
     private fun bindWidgets() {
         statusDot   = findViewById(R.id.statusDot)
@@ -242,7 +242,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    // ── Config builder ────────────────────────────────────────────────────────
+    
 
     internal fun buildConfigFromSliders(): EqConfig {
         val baseLevel = sliderBaseLevel.progress

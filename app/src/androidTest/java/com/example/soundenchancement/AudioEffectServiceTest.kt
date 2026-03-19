@@ -22,7 +22,7 @@ class AudioEffectServiceTest {
         return (binder as AudioEffectService.LocalBinder).getService()
     }
 
-    // ── Existing: service starts and applies EQ ───────────────────────────────
+    
 
     @Test
     fun serviceStartsAndAppliesEqualizer() {
@@ -48,7 +48,7 @@ class AudioEffectServiceTest {
         assertTrue("Bass band should be stronger than mid band", firstBand > midBand)
     }
 
-    // ── disableEq sets enabled = false and reflects in isEqEnabled ───────────
+    
 
     @Test
     fun disableEq_turnsOffEqualizerEffect() {
@@ -64,13 +64,13 @@ class AudioEffectServiceTest {
         )
     }
 
-    // ── enableEq restores the equalizer without rebuilding band levels ────────
+    
 
     @Test
     fun enableEq_restoresEqualizerAfterDisable() {
         val service = bindService()
 
-        // Capture levels before disable
+        
         val eq = service.equalizer!!
         val levelsBefore = (0 until eq.numberOfBands).map { eq.getBandLevel(it.toShort()) }
 
@@ -85,12 +85,12 @@ class AudioEffectServiceTest {
             service.equalizer?.enabled ?: false
         )
 
-        // Band levels must be unchanged
+        
         val levelsAfter = (0 until eq.numberOfBands).map { eq.getBandLevel(it.toShort()) }
         assertEquals("Band levels should not change on re-enable", levelsBefore, levelsAfter)
     }
 
-    // ── applyConfig updates band levels ──────────────────────────────────────
+    
 
     @Test
     fun applyConfig_updatesBandLevels() {
@@ -99,7 +99,7 @@ class AudioEffectServiceTest {
 
         val before = (0 until eq.numberOfBands).map { eq.getBandLevel(it.toShort()) }
 
-        // Config with all multipliers maxed out — will produce different levels
+        
         val newConfig = EqConfig(
             baseLevel   = 1400,
             multipliers = DoubleArray(8) { 2.0 }
@@ -115,7 +115,7 @@ class AudioEffectServiceTest {
         )
     }
 
-    // ── applyConfig does not apply while EQ is disabled ──────────────────────
+    
 
     @Test
     fun applyConfig_whileDisabled_doesNotEnableEq() {
@@ -123,20 +123,20 @@ class AudioEffectServiceTest {
         service.disableEq()
         assertFalse(service.isEqEnabled)
 
-        // applyConfig rebuilds the equalizer (enabled = true internally),
-        // but the Activity guards the call — here we verify the service itself
-        // always enables after applyConfig (the Activity is responsible for not calling it).
-        // This test documents that contract explicitly.
+        
+        
+        
+        
         service.applyConfig(EqConfig())
-        // After applyConfig the service sets enabled = true regardless; that is
-        // intentional — the guard lives in MainActivity.onStopTrackingTouch.
+        
+        
         assertTrue(
             "applyConfig always re-enables the equalizer; Activity must guard calls",
             service.isEqEnabled
         )
     }
 
-    // ── isEqEnabled tracks disableEq / enableEq cycles ───────────────────────
+    
 
     @Test
     fun isEqEnabled_tracksMultipleToggleCycles() {
