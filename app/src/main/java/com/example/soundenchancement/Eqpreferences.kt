@@ -40,6 +40,6 @@ class EqPreferences(context: Context) {
 
         const val DEFAULT_BASE_LEVEL = 700
 
-        val DEFAULT_BAND_PROGRESS = intArrayOf(110, 90, 70, 40, 40, 45, 70, 80)
+        val DEFAULT_BAND_PROGRESS = intArrayOf(140, 140, 70, 50, 60, 90, 100, 110)
     }
 }
