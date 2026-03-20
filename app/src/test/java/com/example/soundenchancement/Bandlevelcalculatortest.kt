@@ -1,4 +1,4 @@
-package com.example.soundenchancement
+package com.example.soundenhancement
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue

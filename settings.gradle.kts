@@ -22,5 +22,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "Sound Enchancement"
+rootProject.name = "Sound Enhancement"
 include(":app")

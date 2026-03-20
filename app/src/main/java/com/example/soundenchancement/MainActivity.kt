@@ -1,4 +1,4 @@
-package com.example.soundenchancement
+package com.example.soundenhancement
 
 import android.content.ComponentName
 import android.content.Intent

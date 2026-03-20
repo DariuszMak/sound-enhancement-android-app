@@ -1,4 +1,4 @@
-package com.example.soundenchancement
+package com.example.soundenhancement
 
 import android.app.Notification
 import android.app.NotificationChannel

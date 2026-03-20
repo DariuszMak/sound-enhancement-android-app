@@ -8,7 +8,7 @@
   </tr>
   <tr>
     <td align="center">
-      <a href="https://github.com/DariuszMak/sound-enchancement-android-app/releases/download/1.3.1/app-debug.apk">
+      <a href="https://github.com/DariuszMak/sound-enhancement-android-app/releases/download/1.3.1/app-debug.apk">
         <img src="images/app.jpg" width="200px" alt="App Preview">
       </a>
     </td>
