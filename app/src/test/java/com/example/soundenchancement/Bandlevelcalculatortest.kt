@@ -4,9 +4,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
-
 class BandLevelCalculatorTest {
-
 
     private val minLevel = -1500
     private val maxLevel = 1500
@@ -54,7 +52,6 @@ class BandLevelCalculatorTest {
 
     @Test
     fun exactBoundary_60Hz_usesSubBassMultiplier() {
-
         val at60 = calculateBandLevel(60.0, baseLevel, minLevel, maxLevel)
         val at61 = calculateBandLevel(61.0, baseLevel, minLevel, maxLevel)
         assertTrue(
@@ -64,15 +61,16 @@ class BandLevelCalculatorTest {
     }
 
     @Test
-    fun zeroBaseLevel_returnsMinLevel() {
-
-        val level = calculateBandLevel(1000.0, 0, minLevel, maxLevel)
-        assertEquals("Zero baseLevel should yield minLevel", minLevel.toShort(), level)
+    fun zeroMultiplier_returnsZero() {
+        val level = calculateBandLevel(
+            1000.0, baseLevel, minLevel, maxLevel,
+            EqConfig(baseLevel = baseLevel, multipliers = DoubleArray(8) { 0.0 })
+        )
+        assertEquals("Multiplier 0.0 should yield 0", 0.toShort(), level)
     }
 
     @Test
     fun symmetricRange_minEqualsNegativeMax() {
-
         val level = calculateBandLevel(60.0, baseLevel, -1500, 1500)
         assertTrue(level in -1500..1500)
     }
