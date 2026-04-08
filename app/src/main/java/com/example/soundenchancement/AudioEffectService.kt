@@ -36,14 +36,14 @@ fun calculateBandLevel(
 ): Short {
     val m = config.multipliers
     val multiplier = when {
-        freqHz <= 60   -> m[0]
-        freqHz <= 120  -> m[1]
-        freqHz <= 250  -> m[2]
-        freqHz <= 500  -> m[3]
+        freqHz <= 60 -> m[0]
+        freqHz <= 120 -> m[1]
+        freqHz <= 250 -> m[2]
+        freqHz <= 500 -> m[3]
         freqHz <= 2000 -> m[4]
         freqHz <= 4000 -> m[5]
         freqHz <= 8000 -> m[6]
-        else           -> m[7]
+        else -> m[7]
     }
 
     val level = (multiplier * maxLevel).toInt()
