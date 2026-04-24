@@ -134,7 +134,7 @@
                 android:id="@+id/labelBand1"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="≤ 120 Hz (Bass)" />
+                android:text="" />
 
             <SeekBar
                 android:id="@+id/sliderBand1"
@@ -148,7 +148,7 @@
                 android:id="@+id/labelBand2"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="≤ 250 Hz (Low-mid)" />
+                android:text="" />
 
             <SeekBar
                 android:id="@+id/sliderBand2"
@@ -162,7 +162,7 @@
                 android:id="@+id/labelBand3"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="≤ 500 Hz (Mid)" />
+                android:text="" />
 
             <SeekBar
                 android:id="@+id/sliderBand3"
@@ -176,7 +176,7 @@
                 android:id="@+id/labelBand4"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="≤ 2000 Hz (Upper-mid)" />
+                android:text="" />
 
             <SeekBar
                 android:id="@+id/sliderBand4"
