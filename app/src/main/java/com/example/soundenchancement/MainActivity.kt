@@ -233,7 +233,7 @@ class MainActivity : AppCompatActivity() {
 
     internal fun buildConfigFromSliders(): EqConfig {
         val baseLevel = sliderBaseLevel.progress
-        val multipliers = DoubleArray(8) { i ->
+        val multipliers = DoubleArray(5) { i ->
             (bandSliders[i]?.progress ?: EqPreferences.DEFAULT_BAND_PROGRESS[i]) / 100.0
         }
         return EqConfig(baseLevel = baseLevel, multipliers = multipliers)

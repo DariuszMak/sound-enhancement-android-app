@@ -102,7 +102,7 @@ class AudioEffectServiceTest {
 
         val newConfig = EqConfig(
             baseLevel = 1400,
-            multipliers = DoubleArray(8) { 2.0 }
+            multipliers = DoubleArray(5) { 2.0 }
         )
         service.applyConfig(newConfig)
 
