@@ -47,8 +47,8 @@ class MainActivity : AppCompatActivity() {
     internal lateinit var sliderBaseLevel: SeekBar
     internal lateinit var labelBaseLevel: TextView
 
-    internal val bandSliders = arrayOfNulls<SeekBar>(8)
-    internal val bandLabels = arrayOfNulls<TextView>(8)
+    internal val bandSliders = arrayOfNulls<SeekBar>(5)
+    internal val bandLabels = arrayOfNulls<TextView>(5)
 
     private val bandNames = arrayOf(
         "≤ 100 Hz (Bass)",
@@ -124,13 +124,13 @@ class MainActivity : AppCompatActivity() {
 
     internal fun onResetClicked() {
         sliderBaseLevel.progress = EqPreferences.DEFAULT_BASE_LEVEL
-        for (i in 0 until 8) {
+        for (i in 0 until 5) {
             bandSliders[i]?.progress = EqPreferences.DEFAULT_BAND_PROGRESS[i]
         }
 
 
         eqPrefs.saveBaseLevel(EqPreferences.DEFAULT_BASE_LEVEL)
-        for (i in 0 until 8) {
+        for (i in 0 until 5) {
             eqPrefs.saveBandProgress(i, EqPreferences.DEFAULT_BAND_PROGRESS[i])
         }
 
@@ -186,7 +186,7 @@ class MainActivity : AppCompatActivity() {
             R.id.labelBand0, R.id.labelBand1, R.id.labelBand2, R.id.labelBand3,
             R.id.labelBand4, R.id.labelBand5, R.id.labelBand6, R.id.labelBand7
         )
-        for (i in 0 until 8) {
+        for (i in 0 until 5) {
             bandSliders[i] = findViewById(sliderIds[i])
             bandLabels[i] = findViewById(labelIds[i])
         }
@@ -205,7 +205,7 @@ class MainActivity : AppCompatActivity() {
             }
         })
 
-        for (i in 0 until 8) {
+        for (i in 0 until 5) {
             val index = i
             bandSliders[i]?.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
                 override fun onProgressChanged(sb: SeekBar?, progress: Int, fromUser: Boolean) {
@@ -225,7 +225,7 @@ class MainActivity : AppCompatActivity() {
 
     internal fun restoreSliderState() {
         sliderBaseLevel.progress = eqPrefs.loadBaseLevel()
-        for (i in 0 until 8) {
+        for (i in 0 until 5) {
             bandSliders[i]?.progress = eqPrefs.loadBandProgress(i)
         }
     }

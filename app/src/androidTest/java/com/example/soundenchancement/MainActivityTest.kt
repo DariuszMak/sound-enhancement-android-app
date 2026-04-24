@@ -74,7 +74,7 @@ class MainActivityTest {
             scenario.onActivity { activity ->
                 activity.btnStop.performClick()
                 assertFalse(activity.sliderBaseLevel.isEnabled)
-                for (i in 0 until 8) {
+                for (i in 0 until 5) {
                     assertFalse(
                         "Band slider $i should be disabled",
                         activity.bandSliders[i]?.isEnabled ?: true
@@ -252,12 +252,12 @@ class MainActivityTest {
     fun restoreSliderState_loadsAllNineSlidersFromPrefs() {
         val prefs = EqPreferences(ApplicationProvider.getApplicationContext())
         prefs.saveBaseLevel(300)
-        for (i in 0 until 8) prefs.saveBandProgress(i, 50 + i * 10)
+        for (i in 0 until 5) prefs.saveBandProgress(i, 50 + i * 10)
 
         ActivityScenario.launch(MainActivity::class.java).use { scenario ->
             scenario.onActivity { activity ->
                 assertEquals(300, activity.sliderBaseLevel.progress)
-                for (i in 0 until 8) {
+                for (i in 0 until 5) {
                     assertEquals(
                         "Band $i progress should be ${50 + i * 10}",
                         50 + i * 10,
@@ -291,14 +291,14 @@ class MainActivityTest {
 
         val prefs = EqPreferences(ApplicationProvider.getApplicationContext())
         prefs.saveBaseLevel(1400)
-        for (i in 0 until 8) prefs.saveBandProgress(i, 200)
+        for (i in 0 until 5) prefs.saveBandProgress(i, 200)
 
         ActivityScenario.launch(MainActivity::class.java).use { scenario ->
             scenario.onActivity { activity ->
                 activity.btnReset.performClick()
 
                 assertEquals(EqPreferences.DEFAULT_BASE_LEVEL, activity.sliderBaseLevel.progress)
-                for (i in 0 until 8) {
+                for (i in 0 until 5) {
                     assertEquals(
                         "Band $i should be reset to default ${EqPreferences.DEFAULT_BAND_PROGRESS[i]}",
                         EqPreferences.DEFAULT_BAND_PROGRESS[i],
@@ -336,7 +336,7 @@ class MainActivityTest {
     fun resetButton_persistsDefaultValuesToPrefs() {
         val prefs = EqPreferences(ApplicationProvider.getApplicationContext())
         prefs.saveBaseLevel(1400)
-        for (i in 0 until 8) prefs.saveBandProgress(i, 200)
+        for (i in 0 until 5) prefs.saveBandProgress(i, 200)
 
         ActivityScenario.launch(MainActivity::class.java).use { scenario ->
             scenario.onActivity { activity ->
@@ -347,7 +347,7 @@ class MainActivityTest {
 
         val prefs2 = EqPreferences(ApplicationProvider.getApplicationContext())
         assertEquals(EqPreferences.DEFAULT_BASE_LEVEL, prefs2.loadBaseLevel())
-        for (i in 0 until 8) {
+        for (i in 0 until 5) {
             assertEquals(
                 "Saved band $i should be default after reset",
                 EqPreferences.DEFAULT_BAND_PROGRESS[i],
@@ -361,7 +361,7 @@ class MainActivityTest {
 
         val prefs = EqPreferences(ApplicationProvider.getApplicationContext())
         prefs.saveBaseLevel(1400)
-        for (i in 0 until 8) prefs.saveBandProgress(i, 200)
+        for (i in 0 until 5) prefs.saveBandProgress(i, 200)
 
         ActivityScenario.launch(MainActivity::class.java).use { scenario ->
             scenario.onActivity { it.btnReset.performClick() }
@@ -384,7 +384,7 @@ class MainActivityTest {
             scenario.onActivity { activity ->
 
                 activity.sliderBaseLevel.progress = 1500
-                for (i in 0 until 8) activity.bandSliders[i]?.progress = 200
+                for (i in 0 until 5) activity.bandSliders[i]?.progress = 200
 
                 activity.btnReset.performClick()
 
