@@ -50,18 +50,13 @@ class MainActivity : AppCompatActivity() {
     internal val bandSliders = arrayOfNulls<SeekBar>(8)
     internal val bandLabels = arrayOfNulls<TextView>(8)
 
-
     private val bandNames = arrayOf(
-        "≤ 60 Hz (Sub-bass)",
-        "≤ 120 Hz (Bass)",
-        "≤ 250 Hz (Low-mid)",
-        "≤ 500 Hz (Mid)",
-        "≤ 2000 Hz (Upper-mid)",
-        "≤ 4000 Hz (Presence)",
-        "≤ 8000 Hz (Brilliance)",
+        "≤ 100 Hz (Bass)",
+        "≤ 500 Hz (Low-mid)",
+        "≤ 2000 Hz (Mid)",
+        "≤ 8000 Hz (Presence)",
         "> 8000 Hz (Air)"
     )
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

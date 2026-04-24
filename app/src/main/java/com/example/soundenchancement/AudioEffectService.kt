@@ -15,7 +15,7 @@ import androidx.core.app.NotificationCompat
 
 data class EqConfig(
     val baseLevel: Int = 700,
-    val multipliers: DoubleArray = doubleArrayOf(1.40, 1.40, 0.70, 0.50, 0.60, 0.90, 1.00, 1.10)
+    val multipliers: DoubleArray = doubleArrayOf(1.40, 1.20, 0.60, 0.90, 1.10)
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -35,15 +35,13 @@ fun calculateBandLevel(
     config: EqConfig = EqConfig()
 ): Short {
     val m = config.multipliers
+    
     val boost = when {
-        freqHz <= 60 -> baseLevel * m[0]
-        freqHz <= 120 -> baseLevel * m[1]
-        freqHz <= 250 -> baseLevel * m[2]
-        freqHz <= 500 -> baseLevel * m[3]
-        freqHz <= 2000 -> baseLevel * m[4]
-        freqHz <= 4000 -> baseLevel * m[5]
-        freqHz <= 8000 -> baseLevel * m[6]
-        else -> baseLevel * m[7]
+        freqHz <= 100    -> baseLevel * m[0]   // Sub-bass / Bass (~60 Hz)
+        freqHz <= 500    -> baseLevel * m[1]   // Low-mid (~230 Hz)
+        freqHz <= 2000   -> baseLevel * m[2]   // Mid (~910 Hz)
+        freqHz <= 8000   -> baseLevel * m[3]   // Presence (~3.6 kHz)
+        else             -> baseLevel * m[4]   // Air (~14 kHz)
     }
 
     val range = maxLevel - minLevel

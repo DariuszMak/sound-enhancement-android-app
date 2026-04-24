@@ -186,48 +186,6 @@
                 android:max="200"
                 android:progress="0" />
 
-            <TextView
-                android:id="@+id/labelBand5"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="≤ 4000 Hz (Presence)" />
-
-            <SeekBar
-                android:id="@+id/sliderBand5"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="12dp"
-                android:max="200"
-                android:progress="0" />
-
-            <TextView
-                android:id="@+id/labelBand6"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="≤ 8000 Hz (Brilliance)" />
-
-            <SeekBar
-                android:id="@+id/sliderBand6"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="12dp"
-                android:max="200"
-                android:progress="0" />
-
-            <TextView
-                android:id="@+id/labelBand7"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="> 8000 Hz (Air)" />
-
-            <SeekBar
-                android:id="@+id/sliderBand7"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="12dp"
-                android:max="200"
-                android:progress="0" />
-
         </LinearLayout>
 
     </LinearLayout>
