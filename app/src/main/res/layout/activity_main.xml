@@ -32,7 +32,7 @@
                 android:id="@+id/statusLabel"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Sound effect: OFF"
+                android:text=""
                 android:textSize="18sp"
                 android:textStyle="bold" />
 
