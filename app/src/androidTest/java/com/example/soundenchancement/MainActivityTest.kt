@@ -429,7 +429,10 @@ class MainActivityTest {
             scenario.onActivity { activity ->
                 for (i in 0 until 5) {
                     val label = activity.bandLabels[i]?.text.toString()
-                    assertTrue("Band $i label should show 0.00, got: '$label'", label.contains("0.00"))
+                    assertTrue(
+                        "Band $i label should show 0.00, got: '$label'",
+                        label.contains("0.00")
+                    )
                 }
             }
         }
