@@ -49,13 +49,24 @@ fun calculateBandLevel(
     return scaled.coerceIn(minLevel, maxLevel).toShort()
 }
 
+fun calculateBandLevels(
+    freqsHz: DoubleArray,
+    config: EqConfig,
+    minLevel: Int,
+    maxLevel: Int
+): ShortArray = ShortArray(freqsHz.size) { i ->
+    calculateBandLevel(freqsHz[i], config.baseLevel, minLevel, maxLevel, config)
+}
+
 class AudioEffectService : Service() {
 
     private val binder = LocalBinder()
+    private val lock = Any()
 
-
+    @Volatile
     internal var equalizer: Equalizer? = null
 
+    @Volatile
     var isEqEnabled: Boolean = false
         private set
 
@@ -74,61 +85,76 @@ class AudioEffectService : Service() {
 
 
     fun applyConfig(config: EqConfig) {
-        enableProfessionalDynamicBass(config)
+        synchronized(lock) {
+            applyConfigLocked(config)
+        }
     }
 
 
     fun disableEq() {
-        equalizer?.enabled = false
-        isEqEnabled = false
+        synchronized(lock) {
+            equalizer?.enabled = false
+            isEqEnabled = false
+        }
         Log.d("AudioBoostService", "Equalizer disabled")
     }
 
 
     fun enableEq() {
-        equalizer?.enabled = true
-        isEqEnabled = true
+        synchronized(lock) {
+            equalizer?.enabled = true
+            isEqEnabled = true
+        }
         Log.d("AudioBoostService", "Equalizer re-enabled")
     }
 
 
-    private fun enableProfessionalDynamicBass(config: EqConfig) {
+    private fun applyConfigLocked(config: EqConfig) {
         try {
-            equalizer?.release()
-            equalizer = Equalizer(0, 0)
-            equalizer?.enabled = true
-            isEqEnabled = true
+            val eq = equalizer ?: Equalizer(0, 0).also { equalizer = it }
 
-            equalizer?.let { eq ->
-                val numberOfBands = eq.numberOfBands
-                val (minLevel, maxLevel) = eq.bandLevelRange
+            eq.enabled = false
+            isEqEnabled = false
 
-                for (i in 0 until numberOfBands) {
-                    val freqHz = eq.getCenterFreq(i.toShort()) / 1000.0
-                    val level = calculateBandLevel(
-                        freqHz,
-                        config.baseLevel,
-                        minLevel.toInt(),
-                        maxLevel.toInt(),
-                        config
-                    )
-                    eq.setBandLevel(i.toShort(), level)
-                }
+            val numberOfBands = eq.numberOfBands.toInt()
+            val (minLevel, maxLevel) = eq.bandLevelRange
+            val freqsHz = DoubleArray(numberOfBands) { i ->
+                eq.getCenterFreq(i.toShort()) / 1000.0
             }
+            val levels = calculateBandLevels(
+                freqsHz,
+                config,
+                minLevel.toInt(),
+                maxLevel.toInt()
+            )
+
+            for (i in levels.indices) {
+                eq.setBandLevel(i.toShort(), levels[i])
+            }
+
+            eq.enabled = true
+            isEqEnabled = true
 
             Log.d("AudioBoostService", "EQ applied: baseLevel=${config.baseLevel}")
         } catch (e: Exception) {
             Log.e("AudioBoostService", "Error applying EQ", e)
+            releaseEqualizerLocked()
         }
     }
 
-    override fun onDestroy() {
+    private fun releaseEqualizerLocked() {
         try {
             equalizer?.release()
-            equalizer = null
-            isEqEnabled = false
         } catch (e: Exception) {
             Log.e("AudioBoostService", "Error releasing Equalizer", e)
+        }
+        equalizer = null
+        isEqEnabled = false
+    }
+
+    override fun onDestroy() {
+        synchronized(lock) {
+            releaseEqualizerLocked()
         }
         super.onDestroy()
     }

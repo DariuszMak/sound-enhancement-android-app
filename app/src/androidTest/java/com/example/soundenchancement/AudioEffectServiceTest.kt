@@ -9,10 +9,15 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertSame
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import java.util.Random
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
 
 @RunWith(AndroidJUnit4::class)
 class AudioEffectServiceTest {
@@ -24,6 +29,23 @@ class AudioEffectServiceTest {
         val context = ApplicationProvider.getApplicationContext<Context>()
         val binder = serviceRule.bindService(Intent(context, AudioEffectService::class.java))
         return (binder as AudioEffectService.LocalBinder).getService()
+    }
+
+    private fun randomConfig(random: Random) = EqConfig(
+        baseLevel = random.nextInt(1501),
+        multipliers = DoubleArray(5) { random.nextInt(201) / 100.0 }
+    )
+
+    private fun expectedLevels(service: AudioEffectService, config: EqConfig): List<Short> {
+        val eq = service.equalizer!!
+        val (minLevel, maxLevel) = eq.bandLevelRange
+        val freqs = DoubleArray(eq.numberOfBands.toInt()) { eq.getCenterFreq(it.toShort()) / 1000.0 }
+        return calculateBandLevels(freqs, config, minLevel.toInt(), maxLevel.toInt()).toList()
+    }
+
+    private fun currentLevels(service: AudioEffectService): List<Short> {
+        val eq = service.equalizer!!
+        return (0 until eq.numberOfBands.toInt()).map { eq.getBandLevel(it.toShort()) }
     }
 
 
@@ -146,5 +168,85 @@ class AudioEffectServiceTest {
             service.enableEq()
             assertTrue("Cycle ${it + 1}: should be enabled", service.isEqEnabled)
         }
+    }
+
+    @Test
+    fun applyConfig_reusesTheSameEqualizerInstance() {
+        val service = bindService()
+        val first = service.equalizer
+
+        repeat(20) { service.applyConfig(randomConfig(Random(it.toLong()))) }
+
+        assertSame("Equalizer must not be recreated on config change", first, service.equalizer)
+    }
+
+    @Test
+    fun applyConfig_leavesEqualizerEnabled() {
+        val service = bindService()
+
+        service.applyConfig(EqConfig(baseLevel = 1500, multipliers = DoubleArray(5) { 2.0 }))
+
+        assertTrue(service.isEqEnabled)
+        assertTrue(service.equalizer!!.enabled)
+    }
+
+    @Test
+    fun rapidApplyConfig_endsWithLevelsOfLastConfig() {
+        val service = bindService()
+        val random = Random(123)
+        var last = EqConfig()
+
+        repeat(100) {
+            last = randomConfig(random)
+            service.applyConfig(last)
+        }
+
+        assertEquals(expectedLevels(service, last), currentLevels(service))
+        assertTrue(service.isEqEnabled)
+        assertTrue(service.equalizer!!.enabled)
+    }
+
+    @Test
+    fun rapidApplyConfig_levelsAlwaysWithinBandRange() {
+        val service = bindService()
+        val random = Random(99)
+
+        repeat(50) {
+            service.applyConfig(randomConfig(random))
+            val eq = service.equalizer!!
+            val (minLevel, maxLevel) = eq.bandLevelRange
+            for (level in currentLevels(service)) {
+                assertTrue("Level $level out of range", level in minLevel..maxLevel)
+            }
+        }
+    }
+
+    @Test
+    fun concurrentApplyConfig_keepsSingleConsistentEqualizer() {
+        val service = bindService()
+        val first = service.equalizer
+        val threads = 4
+        val executor = Executors.newFixedThreadPool(threads)
+        val done = CountDownLatch(threads)
+        val configs = (0 until threads).map { randomConfig(Random(it.toLong())) }
+
+        for (t in 0 until threads) {
+            executor.execute {
+                repeat(25) { service.applyConfig(configs[t]) }
+                done.countDown()
+            }
+        }
+
+        assertTrue(done.await(30, TimeUnit.SECONDS))
+        executor.shutdown()
+
+        assertSame(first, service.equalizer)
+        assertTrue(service.isEqEnabled)
+        assertTrue(service.equalizer!!.enabled)
+        val levels = currentLevels(service)
+        assertTrue(
+            "Final levels must match exactly one of the applied configs",
+            configs.any { expectedLevels(service, it) == levels }
+        )
     }
 }
