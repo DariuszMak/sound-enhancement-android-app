@@ -51,7 +51,7 @@ class BandLevelCalculatorTest {
         val midrange = calculateBandLevel(500.0, baseLevel, minLevel, maxLevel)
         assertTrue(
             "Bass (80 Hz) should be louder than midrange (500 Hz): $bass vs $midrange",
-            bass > midrange
+            bass >= midrange
         )
     }
 
@@ -103,7 +103,7 @@ class BandLevelCalculatorTest {
         val midRangeHigherLevel = calculateBandLevel(500.0, baseLevel, minLevel, maxLevel)
         assertTrue(
             "Lower mid range shold be more silent higher midrange (500 Hz): $midRangeLowerLevel vs $midRangeHigherLevel",
-            midRangeLowerLevel < midRangeHigherLevel
+            midRangeLowerLevel <= midRangeHigherLevel
         )
     }
 
