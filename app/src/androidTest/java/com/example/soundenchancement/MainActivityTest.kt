@@ -103,11 +103,11 @@ class MainActivityTest {
             scenario.onActivity { activity ->
                 val config = activity.buildConfigFromSliders()
                 assertEquals(700, config.baseLevel)
-                assertEquals(1.40, config.multipliers[0], 0.01)
-                assertEquals(1.20, config.multipliers[1], 0.01)
-                assertEquals(0.60, config.multipliers[2], 0.01)
-                assertEquals(0.90, config.multipliers[3], 0.01)
-                assertEquals(1.10, config.multipliers[4], 0.01)
+                assertEquals(2.00, config.multipliers[0], 0.01)
+                assertEquals(2.00, config.multipliers[1], 0.01)
+                assertEquals(0.00, config.multipliers[2], 0.01)
+                assertEquals(1.10, config.multipliers[3], 0.01)
+                assertEquals(2.20, config.multipliers[4], 0.01)
             }
         }
     }
