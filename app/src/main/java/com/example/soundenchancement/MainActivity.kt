@@ -127,6 +127,7 @@ class MainActivity : AppCompatActivity() {
         for (i in 0 until 5) {
             bandSliders[i]?.progress = EqPreferences.DEFAULT_BAND_PROGRESS[i]
         }
+        updateAllLabels()
 
 
         eqPrefs.saveBaseLevel(EqPreferences.DEFAULT_BASE_LEVEL)
@@ -192,10 +193,26 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    internal fun updateBaseLevelLabel(progress: Int) {
+        labelBaseLevel.text = "Base Level: $progress mB"
+    }
+
+    internal fun updateBandLabel(index: Int, progress: Int) {
+        bandLabels[index]?.text =
+            "${bandNames[index]}: ${"%.2f".format(java.util.Locale.US, progress / 100.0)}\u00D7"
+    }
+
+    internal fun updateAllLabels() {
+        updateBaseLevelLabel(sliderBaseLevel.progress)
+        for (i in 0 until 5) {
+            updateBandLabel(i, bandSliders[i]?.progress ?: 0)
+        }
+    }
+
     private fun setupSliderListeners() {
         sliderBaseLevel.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(sb: SeekBar?, progress: Int, fromUser: Boolean) {
-                labelBaseLevel.text = "Base Level: $progress mB"
+                updateBaseLevelLabel(progress)
             }
 
             override fun onStartTrackingTouch(sb: SeekBar?) {}
@@ -209,8 +226,7 @@ class MainActivity : AppCompatActivity() {
             val index = i
             bandSliders[i]?.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
                 override fun onProgressChanged(sb: SeekBar?, progress: Int, fromUser: Boolean) {
-                    bandLabels[index]?.text =
-                        "${bandNames[index]}: ${"%.2f".format(progress / 100.0)}×"
+                    updateBandLabel(index, progress)
                 }
 
                 override fun onStartTrackingTouch(sb: SeekBar?) {}
@@ -228,6 +244,7 @@ class MainActivity : AppCompatActivity() {
         for (i in 0 until 5) {
             bandSliders[i]?.progress = eqPrefs.loadBandProgress(i)
         }
+        updateAllLabels()
     }
 
 

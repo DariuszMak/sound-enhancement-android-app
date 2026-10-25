@@ -392,4 +392,107 @@ class MainActivityTest {
             }
         }
     }
+
+    @Test
+    fun onLaunch_allLabelsAreVisibleOnFreshLaunch() {
+        ActivityScenario.launch(MainActivity::class.java).use { scenario ->
+            scenario.onActivity { activity ->
+                assertTrue(activity.labelBaseLevel.text.isNotEmpty())
+                for (i in 0 until 5) {
+                    assertTrue(
+                        "Band $i label should not be empty",
+                        activity.bandLabels[i]?.text?.isNotEmpty() == true
+                    )
+                }
+            }
+        }
+    }
+
+    @Test
+    fun relaunch_withBaseLevelSavedAsZero_showsBaseLevelLabel() {
+        EqPreferences(ApplicationProvider.getApplicationContext()).saveBaseLevel(0)
+
+        ActivityScenario.launch(MainActivity::class.java).use { scenario ->
+            scenario.onActivity { activity ->
+                assertEquals(0, activity.sliderBaseLevel.progress)
+                assertEquals("Base Level: 0 mB", activity.labelBaseLevel.text.toString())
+            }
+        }
+    }
+
+    @Test
+    fun relaunch_withBandSavedAsZero_showsBandLabel() {
+        val prefs = EqPreferences(ApplicationProvider.getApplicationContext())
+        for (i in 0 until 5) prefs.saveBandProgress(i, 0)
+
+        ActivityScenario.launch(MainActivity::class.java).use { scenario ->
+            scenario.onActivity { activity ->
+                for (i in 0 until 5) {
+                    val label = activity.bandLabels[i]?.text.toString()
+                    assertTrue("Band $i label should show 0.00, got: '$label'", label.contains("0.00"))
+                }
+            }
+        }
+    }
+
+    @Test
+    fun relaunch_afterUserSetsEverythingToZero_labelsAreVisible() {
+        ActivityScenario.launch(MainActivity::class.java).use { scenario ->
+            scenario.onActivity { activity ->
+                activity.sliderBaseLevel.progress = 0
+                for (i in 0 until 5) activity.bandSliders[i]?.progress = 0
+                val prefs = EqPreferences(activity)
+                prefs.saveBaseLevel(0)
+                for (i in 0 until 5) prefs.saveBandProgress(i, 0)
+            }
+        }
+
+        ActivityScenario.launch(MainActivity::class.java).use { scenario ->
+            scenario.onActivity { activity ->
+                assertTrue(activity.labelBaseLevel.text.contains("0"))
+                for (i in 0 until 5) {
+                    assertTrue(activity.bandLabels[i]?.text?.contains("0.00") == true)
+                }
+            }
+        }
+    }
+
+    @Test
+    fun restoreSliderState_updatesLabelsEvenWhenProgressDoesNotChange() {
+        val prefs = EqPreferences(ApplicationProvider.getApplicationContext())
+        prefs.saveBaseLevel(0)
+        prefs.saveBandProgress(2, 0)
+
+        ActivityScenario.launch(MainActivity::class.java).use { scenario ->
+            scenario.onActivity { activity ->
+                activity.labelBaseLevel.text = ""
+                activity.bandLabels[2]?.text = ""
+
+                activity.restoreSliderState()
+
+                assertEquals("Base Level: 0 mB", activity.labelBaseLevel.text.toString())
+                assertTrue(activity.bandLabels[2]?.text?.contains("0.00") == true)
+            }
+        }
+    }
+
+    @Test
+    fun resetButton_updatesLabelsEvenWhenSlidersAlreadyAtDefault() {
+        ActivityScenario.launch(MainActivity::class.java).use { scenario ->
+            scenario.onActivity { activity ->
+                activity.labelBaseLevel.text = ""
+                for (i in 0 until 5) activity.bandLabels[i]?.text = ""
+
+                activity.btnReset.performClick()
+
+                assertEquals("Base Level: 700 mB", activity.labelBaseLevel.text.toString())
+                for (i in 0 until 5) {
+                    assertTrue(
+                        "Band $i label should be filled after reset",
+                        activity.bandLabels[i]?.text?.isNotEmpty() == true
+                    )
+                }
+            }
+        }
+    }
 }
