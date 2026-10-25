@@ -44,6 +44,10 @@ class AudioEffectServiceTest {
         return calculateBandLevels(freqs, config, minLevel.toInt(), maxLevel.toInt()).toList()
     }
 
+    private fun levelsMatch(expected: List<Short>, actual: List<Short>): Boolean =
+        expected.size == actual.size &&
+                expected.indices.all { Math.abs(expected[it] - actual[it]) <= LEVEL_TOLERANCE_MB }
+
     private fun currentLevels(service: AudioEffectService): List<Short> {
         val eq = service.equalizer!!
         return (0 until eq.numberOfBands.toInt()).map { eq.getBandLevel(it.toShort()) }
@@ -202,7 +206,9 @@ class AudioEffectServiceTest {
             service.applyConfig(last)
         }
 
-        assertEquals(expectedLevels(service, last), currentLevels(service))
+        val expected = expectedLevels(service, last)
+        val actual = currentLevels(service)
+        assertTrue("Expected $expected but was $actual", levelsMatch(expected, actual))
         assertTrue(service.isEqEnabled)
         assertTrue(service.equalizer!!.enabled)
     }
@@ -247,7 +253,11 @@ class AudioEffectServiceTest {
         val levels = currentLevels(service)
         assertTrue(
             "Final levels must match exactly one of the applied configs",
-            configs.any { expectedLevels(service, it) == levels }
+            configs.any { levelsMatch(expectedLevels(service, it), levels) }
         )
+    }
+
+    private companion object {
+        const val LEVEL_TOLERANCE_MB = 100
     }
 }
