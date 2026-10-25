@@ -39,7 +39,8 @@ class AudioEffectServiceTest {
     private fun expectedLevels(service: AudioEffectService, config: EqConfig): List<Short> {
         val eq = service.equalizer!!
         val (minLevel, maxLevel) = eq.bandLevelRange
-        val freqs = DoubleArray(eq.numberOfBands.toInt()) { eq.getCenterFreq(it.toShort()) / 1000.0 }
+        val freqs =
+            DoubleArray(eq.numberOfBands.toInt()) { eq.getCenterFreq(it.toShort()) / 1000.0 }
         return calculateBandLevels(freqs, config, minLevel.toInt(), maxLevel.toInt()).toList()
     }
 
