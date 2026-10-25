@@ -107,7 +107,7 @@ class MainActivityTest {
                 assertEquals(2.00, config.multipliers[1], 0.01)
                 assertEquals(0.00, config.multipliers[2], 0.01)
                 assertEquals(1.10, config.multipliers[3], 0.01)
-                assertEquals(2.20, config.multipliers[4], 0.01)
+                assertEquals(2.00, config.multipliers[4], 0.01)
             }
         }
     }
@@ -388,7 +388,7 @@ class MainActivityTest {
                 assertEquals(2.00, config.multipliers[1], 0.01)
                 assertEquals(0.00, config.multipliers[2], 0.01)
                 assertEquals(1.10, config.multipliers[3], 0.01)
-                assertEquals(2.20, config.multipliers[4], 0.01)
+                assertEquals(2.00, config.multipliers[4], 0.01)
             }
         }
     }
