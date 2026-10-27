@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.core.content.ContextCompat
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -495,6 +496,78 @@ class MainActivityTest {
                         activity.bandLabels[i]?.text?.isNotEmpty() == true
                     )
                 }
+            }
+        }
+    }
+
+    @Test
+    fun presetHomeHeadphones_updatesSlidersAndLabels() {
+        ActivityScenario.launch(MainActivity::class.java).use { scenario ->
+            scenario.onActivity { activity ->
+                activity.btnPresetHomeHeadphones.performClick()
+                assertEquals(EqPreferences.DEFAULT_BASE_LEVEL, activity.sliderBaseLevel.progress)
+                assertEquals(200, activity.bandSliders[0]?.progress)
+                assertEquals(200, activity.bandSliders[1]?.progress)
+                assertEquals(0, activity.bandSliders[2]?.progress)
+                assertEquals(110, activity.bandSliders[3]?.progress)
+                assertEquals(200, activity.bandSliders[4]?.progress)
+                assertTrue(activity.labelBaseLevel.text.contains("700"))
+                assertTrue(activity.bandLabels[0]?.text?.contains("2.00") == true)
+            }
+        }
+    }
+
+    @Test
+    fun presetCar_updatesSlidersAndLabels() {
+        ActivityScenario.launch(MainActivity::class.java).use { scenario ->
+            scenario.onActivity { activity ->
+                activity.btnPresetCar.performClick()
+                assertEquals(EqPreferences.DEFAULT_BASE_LEVEL, activity.sliderBaseLevel.progress)
+                assertEquals(150, activity.bandSliders[0]?.progress)
+                assertEquals(200, activity.bandSliders[1]?.progress)
+                assertEquals(0, activity.bandSliders[2]?.progress)
+                assertEquals(120, activity.bandSliders[3]?.progress)
+                assertEquals(200, activity.bandSliders[4]?.progress)
+                assertTrue(activity.bandLabels[0]?.text?.contains("1.50") == true)
+            }
+        }
+    }
+
+    @Test
+    fun presetHomeSystem_updatesSlidersAndLabels() {
+        ActivityScenario.launch(MainActivity::class.java).use { scenario ->
+            scenario.onActivity { activity ->
+                activity.btnPresetHomeSystem.performClick()
+                assertEquals(EqPreferences.DEFAULT_BASE_LEVEL, activity.sliderBaseLevel.progress)
+                assertEquals(160, activity.bandSliders[0]?.progress)
+                assertEquals(120, activity.bandSliders[1]?.progress)
+                assertEquals(0, activity.bandSliders[2]?.progress)
+                assertEquals(200, activity.bandSliders[3]?.progress)
+                assertEquals(200, activity.bandSliders[4]?.progress)
+                assertTrue(activity.bandLabels[0]?.text?.contains("1.60") == true)
+            }
+        }
+    }
+
+    @Test
+    fun presetSavesToPrefsAndRestoresOnRelaunch() {
+        ActivityScenario.launch(MainActivity::class.java).use { scenario ->
+            scenario.onActivity { activity ->
+                activity.btnPresetCar.performClick()
+            }
+        }
+
+        val prefs = EqPreferences(ApplicationProvider.getApplicationContext())
+        assertEquals(EqPreferences.PRESET_CAR, prefs.loadCurrentPreset())
+
+        ActivityScenario.launch(MainActivity::class.java).use { scenario ->
+            scenario.onActivity { activity ->
+                assertEquals(EqPreferences.DEFAULT_BASE_LEVEL, activity.sliderBaseLevel.progress)
+                assertEquals(150, activity.bandSliders[0]?.progress)
+                assertEquals(200, activity.bandSliders[1]?.progress)
+                assertEquals(0, activity.bandSliders[2]?.progress)
+                assertEquals(120, activity.bandSliders[3]?.progress)
+                assertEquals(200, activity.bandSliders[4]?.progress)
             }
         }
     }

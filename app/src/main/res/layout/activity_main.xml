@@ -58,6 +58,40 @@
 
 
         <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:layout_marginTop="8dp">
+
+            <Button
+                android:id="@+id/btnPresetHomeHeadphones"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginEnd="4dp"
+                android:text="Home Headphones" />
+
+            <Button
+                android:id="@+id/btnPresetCar"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="2dp"
+                android:layout_marginEnd="2dp"
+                android:text="Car Sound System" />
+
+            <Button
+                android:id="@+id/btnPresetHomeSystem"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="4dp"
+                android:text="Home Sound System" />
+        </LinearLayout>
+
+
+        <LinearLayout
             android:id="@+id/eqPanel"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

@@ -42,6 +42,9 @@ class MainActivity : AppCompatActivity() {
     internal lateinit var btnStart: Button
     internal lateinit var btnStop: Button
     internal lateinit var btnReset: Button
+    internal lateinit var btnPresetHomeHeadphones: Button
+    internal lateinit var btnPresetCar: Button
+    internal lateinit var btnPresetHomeSystem: Button
     internal lateinit var eqPanel: View
 
     internal lateinit var sliderBaseLevel: SeekBar
@@ -67,7 +70,7 @@ class MainActivity : AppCompatActivity() {
         bindWidgets()
         setupSliderListeners()
         restoreSliderState()
-
+        restorePresetState()
 
         isBassActive = eqPrefs.loadIsActive()
         if (isBassActive) startService(Intent(this, AudioEffectService::class.java))
@@ -76,6 +79,9 @@ class MainActivity : AppCompatActivity() {
         btnStart.setOnClickListener { onStartClicked() }
         btnStop.setOnClickListener { onStopClicked() }
         btnReset.setOnClickListener { onResetClicked() }
+        btnPresetHomeHeadphones.setOnClickListener { applyPreset(EqPreferences.PRESET_HOME_HEADPHONES) }
+        btnPresetCar.setOnClickListener { applyPreset(EqPreferences.PRESET_CAR) }
+        btnPresetHomeSystem.setOnClickListener { applyPreset(EqPreferences.PRESET_HOME_SYSTEM) }
     }
 
     override fun onStart() {
@@ -136,8 +142,26 @@ class MainActivity : AppCompatActivity() {
         }
 
         if (isBassActive) audioService?.applyConfig(buildConfigFromSliders())
+        updatePresetButtonState(EqPreferences.PRESET_HOME_HEADPHONES)
     }
 
+    private fun applyPreset(index: Int) {
+        val multipliers = EqPreferences.PRESET_MULTIPLIERS[index]
+        sliderBaseLevel.progress = EqPreferences.DEFAULT_BASE_LEVEL
+        for (i in 0 until 5) {
+            bandSliders[i]?.progress = (multipliers[i] * 100).toInt()
+        }
+        updateAllLabels()
+
+        eqPrefs.saveBaseLevel(EqPreferences.DEFAULT_BASE_LEVEL)
+        for (i in 0 until 5) {
+            eqPrefs.saveBandProgress(i, bandSliders[i]?.progress ?: 0)
+        }
+        eqPrefs.saveCurrentPreset(index)
+        updatePresetButtonState(index)
+
+        if (isBassActive) audioService?.applyConfig(buildConfigFromSliders())
+    }
 
     internal fun refreshUi() {
         if (isBassActive) {
@@ -174,6 +198,9 @@ class MainActivity : AppCompatActivity() {
         btnStart = findViewById(R.id.btnStart)
         btnStop = findViewById(R.id.btnStop)
         btnReset = findViewById(R.id.btnReset)
+        btnPresetHomeHeadphones = findViewById(R.id.btnPresetHomeHeadphones)
+        btnPresetCar = findViewById(R.id.btnPresetCar)
+        btnPresetHomeSystem = findViewById(R.id.btnPresetHomeSystem)
         eqPanel = findViewById(R.id.eqPanel)
 
         sliderBaseLevel = findViewById(R.id.sliderBaseLevel)
@@ -191,6 +218,26 @@ class MainActivity : AppCompatActivity() {
             bandSliders[i] = findViewById(sliderIds[i])
             bandLabels[i] = findViewById(labelIds[i])
         }
+    }
+
+    private fun restorePresetState() {
+        val presetIndex = eqPrefs.loadCurrentPreset()
+        updatePresetButtonState(presetIndex)
+    }
+
+    private fun updatePresetButtonState(activeIndex: Int) {
+        val defaultBg = ContextCompat.getColor(this, android.R.color.darker_gray)
+        val activeBg = ContextCompat.getColor(this, android.R.color.holo_blue_light)
+
+        btnPresetHomeHeadphones.setBackgroundColor(
+            if (activeIndex == EqPreferences.PRESET_HOME_HEADPHONES) activeBg else defaultBg
+        )
+        btnPresetCar.setBackgroundColor(
+            if (activeIndex == EqPreferences.PRESET_CAR) activeBg else defaultBg
+        )
+        btnPresetHomeSystem.setBackgroundColor(
+            if (activeIndex == EqPreferences.PRESET_HOME_SYSTEM) activeBg else defaultBg
+        )
     }
 
     internal fun updateBaseLevelLabel(progress: Int) {
